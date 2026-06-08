@@ -19,11 +19,27 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 
 # 4. Conda 경로 설정 및 환경 생성
 ENV PATH=$CONDA_DIR/bin:$PATH
-RUN conda create -n r-reticulate python=3.10 -y && \
-    conda install -n r-reticulate --override-channels -c conda-forge -y pyarrow numpy pandas matplotlib polars plotnine statsmodels scipy patsy \
-    notebook jupyterlab jupyter_client ipykernel \
+
+RUN conda create -n r-reticulate --override-channels -c conda-forge -y \
+    python=3.10 \
+    pyarrow \
+    numpy \
+    pandas \
+    polars \
+    plotnine \
+    statsmodels \
+    scipy \
+    patsy \
+    notebook \
+    jupyterlab \
+    jupyter_client \
+    ipykernel \
     && conda clean -afy
 # 추가로 필요한 패키지 설치
+
+# r-reticulate 환경을 기본 Python/Jupyter 환경으로 사용
+ENV PATH=/opt/conda/envs/r-reticulate/bin:/opt/conda/bin:$PATH
+ENV RETICULATE_PYTHON=/opt/conda/envs/r-reticulate/bin/python
 
 # 5. R 패키지 설치 (reticulate 및 필수 패키지)
 RUN R -e "install.packages(c('reticulate', 'remotes', 'IRkernel', 'NHANES', 'MASS', 'broom', 'Lahman'))" && \
