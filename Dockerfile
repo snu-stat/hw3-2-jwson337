@@ -19,7 +19,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 # 4. Conda 경로 설정 및 환경 생성
 ENV PATH=$CONDA_DIR/bin:$PATH
 RUN conda create -n r-reticulate python=3.10 -y && \
-    conda install -n r-reticulate -c conda-forge numpy pandas matplotlib polars plotnine statsmodels scipy patsy -y
+    conda install -n r-reticulate -c conda-forge pip numpy pandas matplotlib polars plotnine statsmodels scipy patsy -y
     conda run -n r-reticulate python -m pip install pylahman
 # 추가로 필요한 패키지 설치
 
