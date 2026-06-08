@@ -5477,7 +5477,7 @@ current_smoker ~ Education + HardDrugs + MaritalStatus + Alcohol12PlusYr +
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
 <span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;plotnine.ggplot.ggplot object at 0x7fa0609aa080&gt;</code></pre>
+<pre><code>&lt;plotnine.ggplot.ggplot object at 0x7f3a813383a0&gt;</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iii: Observed WPct vs predicted WPct</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>(</span>
@@ -5497,7 +5497,7 @@ current_smoker ~ Education + HardDrugs + MaritalStatus + Alcohol12PlusYr +
 <span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
 <span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;plotnine.ggplot.ggplot object at 0x7fa06096a380&gt;</code></pre>
+<pre><code>&lt;plotnine.ggplot.ggplot object at 0x7f3a81338070&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -6256,7 +6256,7 @@ Model Family:                Binomial   Df Model:                            4
 Link Function:                  Logit   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:                -1295.8
 Date:                Mon, 08 Jun 2026   Deviance:                       108.42
-Time:                        20:20:12   Pearson chi2:                     108.
+Time:                        20:42:13   Pearson chi2:                     108.
 No. Iterations:                     4   Pseudo R-squ. (CS):             0.9709
 Covariance Type:            nonrobust                                         
 ==============================================================================
@@ -6740,7 +6740,7 @@ Model Family:                 Poisson   Df Model:                            3
 Link Function:                    Log   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:                -1433.6
 Date:                Mon, 08 Jun 2026   Deviance:                       67.326
-Time:                        20:20:15   Pearson chi2:                     67.0
+Time:                        20:42:17   Pearson chi2:                     67.0
 No. Iterations:                     4   Pseudo R-squ. (CS):             0.8302
 Covariance Type:            nonrobust                                         
 ==============================================================================
@@ -6788,8 +6788,7 @@ SV             0.0054      0.001      5.949      0.000       0.004       0.007
 <span id="cb91-19"><a href="#cb91-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb91-20"><a href="#cb91-20" aria-hidden="true" tabindex="-1"></a>nb_warnings <span class="co"># Negative binomial warnings during full-model fitting</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] &quot;iteration limit reached&quot; &quot;NaNs produced&quot;          
-[3] &quot;iteration limit reached&quot; &quot;NaNs produced&quot;          </code></pre>
+<pre><code>[1] &quot;iteration limit reached&quot; &quot;iteration limit reached&quot;</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inherits</span>(nb_full, <span class="st">&quot;error&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
