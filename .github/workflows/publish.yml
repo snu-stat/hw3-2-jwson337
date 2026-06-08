@@ -29,7 +29,7 @@ jobs:
 
       - name: Install Python dependencies via Conda
         run: |
-          conda install -n r-reticulate -y numpy pandas matplotlib polars plotnine statsmodels scipy patsy
+          conda install -n r-reticulate -y pyarrow numpy pandas matplotlib polars plotnine statsmodels scipy patsy
         # 추가로 필요한 패키지 설치
         shell: bash -l {0}
 
