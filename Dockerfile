@@ -20,7 +20,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 ENV PATH=$CONDA_DIR/bin:$PATH
 RUN conda create -n r-reticulate python=3.10 -y && \
     conda install -n r-reticulate -c conda-forge pip numpy pandas matplotlib polars plotnine statsmodels scipy patsy -y
-    conda run -n r-reticulate python -m pip install pylahman
+    conda run -n r-reticulate python -m pip install pylahman==0.7.0
 # 추가로 필요한 패키지 설치
 
 # 5. R 패키지 설치 (reticulate 및 필수 패키지)
