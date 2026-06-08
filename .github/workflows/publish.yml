@@ -57,7 +57,6 @@ jobs:
           export CONDA_PREFIX=$(conda info --base)/envs/r-reticulate
           export RETICULATE_PYTHON=$CONDA_PREFIX/bin/python
           export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:${LD_LIBRARY_PATH}
-          export LD_PRELOAD=$CONDA_PREFIX/lib/libexpat.so
           quarto render
           quarto render hw03.qmd --to ipynb --output-dir _site
         shell: bash -l {0}
