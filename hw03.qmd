@@ -1,7 +1,7 @@
 ---
 title: "숙제 3"
 subtitle: "데이터과학 입문"
-author: "원중호"
+author: "손정우"
 date: today
 date-format: "MMMM YYYY"
 institute: 서울대학교 통계학과
@@ -15,7 +15,8 @@ mainfont: "Noto Sans Korean Light"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, fig.width=6, fig.height=4, out.width = "70%", fig.align = "center", python.reticulate = TRUE)  
 options(knitr.table.format = "html")
-reticulate::use_condaenv(condaenv = "introds", conda = "/opt/homebrew/bin/conda") # for persistency
+
+reticulate::use_condaenv("introds", required = TRUE)
 ```
 
 ## 지시사항
@@ -57,6 +58,40 @@ Python code
 
 #### **늦게 제출된 과제물은 받지 않는다.**
 
+
+## Setup
+::: {.panel-tabset}
+## R
+```{r}
+library(tidyverse)
+library(NHANES)
+library(MASS)
+library(broom)
+library(Lahman)
+```
+## Python
+```{python}
+import numpy as np
+import pandas as pd
+import polars as pl
+from plotnine import *
+
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.discrete.discrete_model import NegativeBinomial
+from scipy import stats
+from scipy.special import expit
+from patsy.contrasts import Treatment
+
+import pylahman
+from scipy.optimize import least_squares, brentq, minimize_scalar
+from scipy.stats import t, norm, chi2
+
+import warnings
+```
+:::
+
+
 # 1부  교과서 연습문제
 
 ## 문제 1-1
@@ -64,6 +99,507 @@ Python code
 1. MDSR 10장 연습문제 10.6.6
 
 ### 답안
+
+#### 1. MDSR 10장 연습문제 10.6.6. 
+::: {.panel-tabset}
+## R
+```{r}
+# Construct response variable
+nhanes_adult <- NHANES %>%
+  filter(Age >= 20) %>%
+  mutate(
+    current_smoker = case_when(
+      Smoke100 == "No" ~ 0L,
+      Smoke100 == "Yes" & SmokeNow == "Yes" ~ 1L,
+      Smoke100 == "Yes" & SmokeNow == "No" ~ 0L,
+      TRUE ~ NA_integer_
+    )
+  )
+
+# Define variables to exclude from the candidate predictor set
+leakage_vars <- c(
+  "Smoke100", "SmokeNow", "Smoke100n", "SmokeAge"
+)
+id_vars <- c(
+  "ID", "SurveyYr"
+)
+redundant_vars <- c(
+  "AgeDecade", "AgeMonths",
+  "HHIncome",
+  "BMI_WHO", "BMICatUnder20yrs",
+  "Weight", "Height",
+  "BPSys1", "BPDia1",
+  "BPSys2", "BPDia2",
+  "BPSys3", "BPDia3"
+)
+subpopulation_vars <- c(
+  "Length", "HeadCirc",
+  "PregnantNow",
+  "nPregnancies", "nBabies", "Age1stBaby",
+  "DiabetesAge",
+  "PhysActiveDays",
+  "AlcoholDay", "AlcoholYear",
+  "AgeFirstMarij", "AgeRegMarij",
+  "SexAge", "SexNumPartnLife", "SexNumPartYear"
+)
+excluded_vars <- unique(c(
+  "current_smoker",
+  leakage_vars,
+  id_vars,
+  redundant_vars,
+  subpopulation_vars
+))
+candidate_pool <- setdiff(names(nhanes_adult), excluded_vars)
+
+# Remove variables with too much missingness
+max_missing <- 0.30
+missing_table <- nhanes_adult %>%
+  dplyr::select(all_of(candidate_pool)) %>%
+  summarize(across(everything(), ~ mean(is.na(.x)))) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "variable",
+    values_to = "missing_rate"
+  ) %>%
+  arrange(missing_rate)
+
+candidate_predictors <- missing_table %>%
+  filter(missing_rate <= max_missing) %>%
+  pull(variable)
+
+# complete-case modeling data
+smoke_dat <- nhanes_adult %>%
+  dplyr::select(current_smoker, all_of(candidate_predictors)) %>%
+  drop_na() %>%
+  mutate(
+    across(
+      where(~ is.character(.x) || is.factor(.x)),
+      ~ forcats::fct_drop(as.factor(.x))
+    )
+  )
+
+# Drop predictors that have only one observed value after filtering.
+candidate_predictors <- candidate_predictors[
+  sapply(smoke_dat[candidate_predictors], function(x) n_distinct(x) > 1)
+]
+
+# Fit null model and run stepAIC from the null model
+null_mod <- glm(
+  current_smoker ~ 1,
+  data = smoke_dat,
+  family = binomial
+)
+upper_scope <- as.formula(
+  paste("~", paste(candidate_predictors, collapse = " + "))
+)
+
+selected_mod <- MASS::stepAIC(
+  null_mod,
+  scope = list(
+    lower = ~ 1,
+    upper = upper_scope
+  ),
+  direction = "both",
+  trace = FALSE
+)
+selected_mod$anova
+
+# likelihood-ratio tests for selected predictors
+lrt_table <- drop1(selected_mod, test = "Chisq") %>%
+  as.data.frame() %>%
+  rownames_to_column("term") %>%
+  filter(term != "<none>") %>%
+  arrange(`Pr(>Chi)`)
+lrt_table
+
+# final identified predictors
+identified_predictors <- lrt_table %>%
+  filter(`Pr(>Chi)` < 0.05) %>%
+  dplyr::select(term, Df, Deviance, LRT, `Pr(>Chi)`)
+identified_predictors
+
+# write_csv(NHANES::NHANES, "NHANES.csv")
+# generated csv file to use in python
+```
+
+## Python
+```{python}
+NHANES = pl.read_csv(
+    "NHANES.csv",
+    null_values=["NA", ""]
+)
+
+# Construct response variable
+nhanes_adult = (
+    NHANES
+    .filter(pl.col("Age") >= 20)
+    .with_columns(
+        pl.when(pl.col("Smoke100") == "No")
+        .then(pl.lit(0))
+        .when(
+            (pl.col("Smoke100") == "Yes") &
+            (pl.col("SmokeNow") == "Yes")
+        )
+        .then(pl.lit(1))
+        .when(
+            (pl.col("Smoke100") == "Yes") &
+            (pl.col("SmokeNow") == "No")
+        )
+        .then(pl.lit(0))
+        .otherwise(None)
+        .cast(pl.Int64)
+        .alias("current_smoker")
+    )
+)
+
+# Define variables to exclude from the candidate predictor set
+leakage_vars = [
+    "Smoke100", "SmokeNow", "Smoke100n", "SmokeAge"
+]
+id_vars = [
+    "ID", "SurveyYr"
+]
+redundant_vars = [
+    "AgeDecade", "AgeMonths",
+    "HHIncome",
+    "BMI_WHO", "BMICatUnder20yrs",
+    "Weight", "Height",
+    "BPSys1", "BPDia1",
+    "BPSys2", "BPDia2",
+    "BPSys3", "BPDia3"
+]
+subpopulation_vars = [
+    "Length", "HeadCirc",
+    "PregnantNow",
+    "nPregnancies", "nBabies", "Age1stBaby",
+    "DiabetesAge",
+    "PhysActiveDays",
+    "AlcoholDay", "AlcoholYear",
+    "AgeFirstMarij", "AgeRegMarij",
+    "SexAge", "SexNumPartnLife", "SexNumPartYear"
+]
+
+excluded_vars = list(dict.fromkeys(
+    ["current_smoker"]
+    + leakage_vars
+    + id_vars
+    + redundant_vars
+    + subpopulation_vars
+))
+candidate_pool = [
+    col for col in nhanes_adult.columns
+    if col not in excluded_vars
+]
+
+# Remove variables with too much missingness
+max_missing = 0.30
+missing_rates = (
+    nhanes_adult
+    .select([
+        pl.col(col).is_null().mean().alias(col)
+        for col in candidate_pool
+    ])
+    .row(0)
+)
+missing_table = (
+    pl.DataFrame({
+        "variable": candidate_pool,
+        "missing_rate": list(missing_rates)
+    })
+    .sort("missing_rate")
+)
+
+candidate_predictors = (
+    missing_table
+    .filter(pl.col("missing_rate") <= max_missing)
+    .get_column("variable")
+    .to_list()
+)
+
+# Complete-case modeling data
+smoke_dat_pl = (
+    nhanes_adult
+    .select(["current_smoker"] + candidate_predictors)
+    .drop_nulls()
+)
+
+# Identify categorical variables.
+categorical_vars = [
+    col for col in candidate_predictors
+    if smoke_dat_pl.schema[col] == pl.Utf8
+]
+
+# Drop predictors that have only one observed value after filtering.
+n_unique_values = (
+    smoke_dat_pl
+    .select([
+        pl.col(col).n_unique().alias(col)
+        for col in candidate_predictors
+    ])
+    .row(0)
+)
+candidate_predictors = [
+    col for col, n_unique in zip(candidate_predictors, n_unique_values)
+    if n_unique > 1
+]
+categorical_vars = [
+    col for col in categorical_vars
+    if col in candidate_predictors
+]
+
+smoke_dat_pl = smoke_dat_pl.select(
+    ["current_smoker"] + candidate_predictors
+)
+
+# Convert to pandas for statsmodels
+smoke_dat = smoke_dat_pl.to_pandas()
+
+# Match R's unordered factor behavior
+for col in categorical_vars:
+    levels = sorted(smoke_dat[col].dropna().unique())
+
+    smoke_dat[col] = pd.Categorical(
+        smoke_dat[col],
+        categories=levels,
+        ordered=False
+    )
+
+# Helper functions for GLM formulas and model fitting
+def q(var):
+    """
+    Quote variable names safely for Patsy formulas.
+    """
+    return f'Q("{var}")'
+
+
+def formula_term(var):
+    """
+    Match R glm behavior:
+    - Numeric variables enter linearly.
+    - Unordered categorical variables use treatment coding.
+    """
+    if var in categorical_vars:
+        return f'C({q(var)}, Treatment(reference=0))'
+    return q(var)
+
+
+def make_formula(response, terms):
+    if len(terms) == 0:
+        return f'{q(response)} ~ 1'
+
+    rhs = " + ".join(formula_term(term) for term in terms)
+    return f'{q(response)} ~ {rhs}'
+
+
+def fit_glm_binomial(terms):
+    """
+    Fit logistic regression with IRLS.
+
+    R's glm() default is approximately:
+    glm.control(epsilon = 1e-8, maxit = 25)
+    """
+    formula = make_formula("current_smoker", terms)
+
+    model = smf.glm(
+        formula=formula,
+        data=smoke_dat,
+        family=sm.families.Binomial()
+    ).fit(
+        method="IRLS",
+        maxiter=25,
+        tol=1e-8
+    )
+
+    return model
+
+# Fit null model and run stepAIC from the null model
+def stepwise_aic_from_null(candidate_terms, trace=False, tol=1e-8):
+    """
+    Python analogue of:
+
+    MASS::stepAIC(
+      null_mod,
+      scope = list(lower = ~ 1, upper = upper_scope),
+      direction = "both",
+      trace = FALSE
+    )
+
+    At each step, this function tries adding or dropping one term.
+    It moves to the model with the lowest AIC if that AIC improves.
+    """
+
+    current_terms = []
+    current_model = fit_glm_binomial(current_terms)
+    current_aic = current_model.aic
+
+    path = [{
+        "Action": "Start",
+        "Term": "<none>",
+        "Df_Model": current_model.df_model,
+        "Resid_Df": current_model.df_resid,
+        "Deviance": current_model.deviance,
+        "AIC": current_model.aic
+    }]
+
+    step = 1
+
+    while True:
+        candidate_moves = []
+
+        # Try dropping each term currently in the model
+        for term in current_terms:
+            trial_terms = [
+                t for t in current_terms
+                if t != term
+            ]
+
+            try:
+                trial_model = fit_glm_binomial(trial_terms)
+
+                candidate_moves.append({
+                    "action": "Drop",
+                    "term": term,
+                    "terms": trial_terms,
+                    "model": trial_model,
+                    "AIC": trial_model.aic
+                })
+            except Exception:
+                pass
+
+        # Try adding each term not currently in the model
+        for term in candidate_terms:
+            if term not in current_terms:
+                trial_terms = current_terms + [term]
+
+                try:
+                    trial_model = fit_glm_binomial(trial_terms)
+
+                    candidate_moves.append({
+                        "action": "Add",
+                        "term": term,
+                        "terms": trial_terms,
+                        "model": trial_model,
+                        "AIC": trial_model.aic
+                    })
+                except Exception:
+                    pass
+
+        if len(candidate_moves) == 0:
+            break
+
+        best_move = min(candidate_moves, key=lambda x: x["AIC"])
+
+        if best_move["AIC"] + tol < current_aic:
+            current_terms = best_move["terms"]
+            current_model = best_move["model"]
+            current_aic = best_move["AIC"]
+
+            path.append({
+                "Action": best_move["action"],
+                "Term": best_move["term"],
+                "Df_Model": current_model.df_model,
+                "Resid_Df": current_model.df_resid,
+                "Deviance": current_model.deviance,
+                "AIC": current_model.aic
+            })
+
+            if trace:
+                print(
+                    f"Step {step}: {best_move['action']} {best_move['term']}, "
+                    f"AIC = {current_aic:.4f}"
+                )
+
+            step += 1
+        else:
+            break
+
+    return current_model, current_terms, pd.DataFrame(path)
+
+
+selected_mod, selected_terms, step_path = stepwise_aic_from_null(
+    candidate_terms=candidate_predictors,
+    trace=False,
+    tol=1e-8
+)
+
+print(step_path) # Stepwise AIC selection path 
+
+# Likelihood-ratio tests for selected predictors
+def drop1_lrt(full_model, selected_terms):
+    """
+    Python equivalent of:
+
+    drop1(selected_mod, test = "Chisq")
+
+    For each selected term, compare:
+
+    full model:
+        selected model
+
+    reduced model:
+        selected model with that term removed
+
+    Columns:
+    - Df: number of parameters removed
+    - Deviance: residual deviance of the reduced model
+    - AIC: AIC of the reduced model
+    - LRT: likelihood-ratio statistic
+    - Pr(>Chi): chi-square p-value
+    """
+
+    rows = []
+
+    full_deviance = full_model.deviance
+    full_df_model = full_model.df_model
+
+    for term in selected_terms:
+        reduced_terms = [
+            t for t in selected_terms
+            if t != term
+        ]
+
+        reduced_model = fit_glm_binomial(reduced_terms)
+
+        df_diff = int(round(full_df_model - reduced_model.df_model))
+        lrt_stat = reduced_model.deviance - full_deviance
+        p_value = stats.chi2.sf(lrt_stat, df_diff)
+
+        rows.append({
+            "term": term,
+            "Df": df_diff,
+            "Deviance": reduced_model.deviance,
+            "AIC": reduced_model.aic,
+            "LRT": lrt_stat,
+            "Pr(>Chi)": p_value
+        })
+
+    return (
+        pd.DataFrame(rows)
+        .sort_values("Pr(>Chi)")
+        .reset_index(drop=True)
+    )
+
+lrt_table = drop1_lrt(selected_mod, selected_terms)
+print(lrt_table)
+
+# Final identified predictors
+identified_predictors = (
+    lrt_table
+    .loc[
+        lrt_table["Pr(>Chi)"] < 0.05,
+        ["term", "Df", "Deviance", "LRT", "Pr(>Chi)"]
+    ]
+    .reset_index(drop=True)
+)
+print(identified_predictors)
+
+```
+::: 
+
+문제에서 단순히 하나의 logistic regression model을 fitting하라고 한 것이 아니라 "identify predictors"라고 했으므로 변수선택을 stepAIC()를 활용하여 진행한다. stepAIC()를 통해 선택된 설명변수들 각각에 대해서도 likelihood-ratio test를 통해 유의한지 확인한다. stepAIC()를 call하기 전에 candidate predictors를 추린다. 흡연여부와 직접적으로 관련되어 leakage 문제가 생길 수 있는 SmokeAge 등의 변수는 설명변수로 사용하는 것이 부적절하므로 제외한다. 또한, 변수들 중 redundant(예: Age와 AgeDecade는 너무 비슷한 정보 가지고 있음)한 것이 많아 적절히 추려서 사용한다. Missing data가 너무 많은 variable도 사용할 수 있는 sample size를 너무 줄일 수 있기에 제외한다. ID, SurveyYr 처럼 데이터 식별용으로 존재하는 것들도 제외한다. PregnantNow 처럼 모든 사람이 아닌 subpopulation에 대해서만 측정된 변수도 제외한다. 
+
+Python은 R과 달리 stepAIC() 함수가 구현되어 있지 않아 직접 구현하여 사용한다. 
+두 언어의 실행 결과가 consistent하도록 하기 위해 python의 구현에서 R의 coding matrix와 default hyperparameters를 최대한 맞추려고 하였다. 
 
 
 # 2부  데이터 분석 실무
@@ -100,11 +636,1066 @@ $$
 
 ### 답안
 
+#### 문제 2-1-1. 
+::: {.panel-tabset}
+## R
+```{r}
+# python 패키지의 데이터프레임과 동일한 데이터인지 확인 위해. 
+dim(Teams)
+
+# observational unit에 문제 없는지 확인. 
+Teams %>% 
+  group_by(teamID, yearID) %>% 
+  summarize(count = n()) %>% 
+  pull(count) %>% 
+  unique()
+
+
+teams_bj <- Teams %>%
+  filter(
+    yearID >= 2010,
+    yearID <= 2025,
+    yearID != 2020
+  ) %>%
+  mutate(
+    RS = R,              # Runs scored
+    WPct = W / (W + L)   # Winning percentage
+  ) %>%
+  filter(
+    !is.na(WPct),
+    !is.na(RS),
+    !is.na(RA),
+    RS > 0,
+    RA > 0
+  )
+
+# Fit nonlinear least-squares model
+bj_nls <- nls(
+  WPct ~ 1 / (1 + (RA / RS)^k),
+  data = teams_bj,
+  start = list(k = 2),   # 원래 Bill James의 모델을 초기값으로 사용. 
+  control = nls.control(
+    maxiter = 100,
+    warnOnly = TRUE
+  )
+)
+
+# Point estimate and confidence interval for k
+k_hat <- coef(bj_nls)[["k"]]
+
+k_ci <- confint(
+  bj_nls,
+  parm = "k",
+  level = 0.95
+)
+
+k_ci
+
+k_result <- tibble(
+  parameter = "k",
+  estimate = k_hat,
+  conf.low = k_ci[1],
+  conf.high = k_ci[2],
+  conf.level = 0.95,
+  ci.method = "profile"
+)
+k_result
+
+```
+## Python
+```{python}
+Teams_pd = pylahman.Teams()
+Teams = pl.from_pandas(Teams_pd)
+print(Teams.shape)
+
+teams_bj = (
+    Teams
+    .filter(
+        (pl.col("yearID") >= 2010) &
+        (pl.col("yearID") <= 2025) &
+        (pl.col("yearID") != 2020)
+    )
+    .with_columns(
+        pl.col("R").alias("RS"),
+        (pl.col("W") / (pl.col("W") + pl.col("L"))).alias("WPct")
+    )
+    .filter(
+        pl.col("WPct").is_not_null() &
+        pl.col("RS").is_not_null() &
+        pl.col("RA").is_not_null() &
+        (pl.col("RS") > 0) &
+        (pl.col("RA") > 0)
+    )
+)
+
+# Convert columns needed for scipy to numpy arrays
+RS = teams_bj.get_column("RS").to_numpy().astype(float)
+RA = teams_bj.get_column("RA").to_numpy().astype(float)
+WPct = teams_bj.get_column("WPct").to_numpy().astype(float)
+
+
+def bill_james_pred(k, RS, RA):
+    return 1 / (1 + (RA / RS) ** k)
+
+
+def residuals(par):
+    k = par[0]
+    return WPct - bill_james_pred(k, RS, RA)
+
+
+fit = least_squares(
+    residuals,
+    x0=np.array([2.0]), 
+    max_nfev=100
+)
+
+if not fit.success:
+    print("\nWarning: nonlinear least-squares optimization did not fully converge.")
+    print(fit.message)
+
+k_hat = fit.x[0]
+
+
+# Profile confidence interval for k
+
+# The profile-t confidence interval solves:
+#   sqrt((RSS(k) - RSS(k_hat)) / sigma_hat^2) = t_{n-p, 0.975}
+
+def rss_at(k):
+    resid = WPct - bill_james_pred(k, RS, RA)
+    return np.sum(resid ** 2)
+
+
+rss_min = rss_at(k_hat)
+
+n = len(WPct)
+p = 1
+df = n - p
+
+sigma_hat_sq = rss_min / df
+t_cutoff = t.ppf(0.975, df)
+
+target_rss = rss_min + sigma_hat_sq * t_cutoff ** 2
+
+
+def profile_root_function(k):
+    return rss_at(k) - target_rss
+
+
+def find_profile_bound(k_center, direction, initial_step=0.1, max_iter=100):
+    """
+    Finds one side of the profile confidence interval.
+
+    direction = -1 for lower bound
+    direction =  1 for upper bound
+    """
+
+    step = max(initial_step, abs(k_center) * 0.05)
+
+    for _ in range(max_iter):
+        candidate = k_center + direction * step
+
+        if profile_root_function(candidate) > 0:
+            if direction < 0:
+                return brentq(profile_root_function, candidate, k_center)
+            else:
+                return brentq(profile_root_function, k_center, candidate)
+
+        step *= 1.5
+
+    raise RuntimeError("Could not find profile confidence interval bound.")
+
+
+conf_low = find_profile_bound(k_hat, direction=-1)
+conf_high = find_profile_bound(k_hat, direction=1)
+
+k_ci = pd.Series(
+    [conf_low, conf_high],
+    index=["2.5%", "97.5%"],
+    name="k"
+)
+
+k_result = pl.DataFrame({
+    "parameter": ["k"],
+    "estimate": [k_hat],
+    "conf.low": [conf_low],
+    "conf.high": [conf_high],
+    "conf.level": [0.95],
+    "ci.method": ["profile"]
+})
+
+print(k_result)
+```
+:::
+
+Non-linear least squares 는 closed form formula가 없으므로 알고리즘의 초기값을 지정해주어야 하는데, Bill James의 원래 모형인 k=2를 초기값으로 사용하였다. 
+
+R의 경우 신뢰구간을 생성할 때 MASS의 confint()를 통해 프로파일링 신뢰구간을 계산하였다. Python의 경우 패키지에 구현되어 있는 프로파일링 신뢰구간 함수가 없어서 직접 구현하였다. 이 문제의 모델의 경우 모수가 k 하나여서 비교적 쉽게 가능하였다. 
+
+
+#### 문제 2-1-2. 
+
+$$
+  logit(WPct) = \beta_1 \log{\frac{RS}{RA}} \iff WPct = \frac{1}{1+(RA / RS)^{\beta1}}
+$$
+이므로 $\log{\frac{RS}{RA}}$ 를 설명변수로 하는 절편이 없는 logistic regression을 적합한다. 
+
+Observational unit i에 대해 W_i 번의 success와 L_i 번의 failure 를 관측한 것으로 간주하고 적합을 진행한다. 
+
+::: {.panel-tabset}
+## R
+```{r}
+# Since W is the number of wins out of W + L games, 
+# we fit a grouped binomial model using cbind(W, L)
+
+teams_bj <- teams_bj %>%
+  mutate(
+    eta = log(RS / RA)
+  )
+
+bj_glm <- glm(
+  cbind(W, L) ~ 0 + eta,
+  data = teams_bj,
+  family = binomial
+)
+
+beta1_hat <- coef(bj_glm)[["eta"]]
+
+beta1_ci <- confint(
+  bj_glm,
+  parm = "eta",
+  level = 0.95
+)
+
+glm_result <- tibble(
+  parameter = "beta_1",
+  estimate = beta1_hat,
+  conf.low = beta1_ci[1],
+  conf.high = beta1_ci[2],
+  conf.level = 0.95,
+)
+glm_result
+
+
+```
+## Python
+```{python}
+teams_bj = teams_bj.with_columns(
+    (pl.col("RS") / pl.col("RA")).log().alias("eta")
+)
+
+teams_bj_pd = teams_bj.to_pandas()
+
+# two-column matrix of successes and failures
+y = teams_bj_pd[["W", "L"]].to_numpy()
+
+# Explanatory variable eta, no intercept
+X = teams_bj_pd[["eta"]].to_numpy()
+
+bj_glm = sm.GLM(
+    y,
+    X,
+    family=sm.families.Binomial()
+).fit()
+
+beta1_hat = bj_glm.params[0]
+
+# Profile-likelihood confidence interval for beta_1
+W = teams_bj_pd["W"].to_numpy(dtype=float)
+L = teams_bj_pd["L"].to_numpy(dtype=float)
+eta = teams_bj_pd["eta"].to_numpy(dtype=float)
+
+def loglik(beta):
+    """
+    Binomial log-likelihood up to constants.
+
+    p_i = sigmoid(beta * eta_i)
+    W_i ~ Binomial(W_i + L_i, p_i)
+
+    Constants do not matter for likelihood-ratio confidence intervals.
+    """
+    linear_pred = beta * eta
+
+    # Stable computation of:
+    # W * log(p) + L * log(1 - p)
+    #
+    # where p = sigmoid(linear_pred)
+    return np.sum(W * linear_pred - (W + L) * np.logaddexp(0, linear_pred))
+
+
+ll_hat = loglik(beta1_hat)
+z_cutoff = norm.ppf(0.975)
+target = z_cutoff ** 2
+
+def profile_eq(beta):
+    return 2 * (ll_hat - loglik(beta)) - target
+
+
+def find_profile_bound(beta_hat, direction, initial_step=0.1, max_iter=100):
+    """
+    Find lower or upper profile-likelihood CI bound.
+
+    direction = -1 for lower bound
+    direction =  1 for upper bound
+    """
+    step = initial_step
+
+    for _ in range(max_iter):
+        candidate = beta_hat + direction * step
+
+        if profile_eq(candidate) > 0:
+            if direction < 0:
+                return brentq(profile_eq, candidate, beta_hat)
+            else:
+                return brentq(profile_eq, beta_hat, candidate)
+
+        step *= 1.5
+
+    raise RuntimeError("Could not find profile confidence interval bound.")
+
+
+beta1_ci_low = find_profile_bound(beta1_hat, direction=-1)
+beta1_ci_high = find_profile_bound(beta1_hat, direction=1)
+
+beta1_ci = pd.Series(
+    [beta1_ci_low, beta1_ci_high],
+    index=["2.5%", "97.5%"],
+    name="eta"
+)
+
+glm_result = pd.DataFrame({
+    "parameter": ["beta_1"],
+    "estimate": [beta1_hat],
+    "conf.low": [beta1_ci_low],
+    "conf.high": [beta1_ci_high],
+    "conf.level": [0.95]
+})
+
+print(glm_result)
+```
+:::
+
+Point estimate 은 1번의 비선형 모델과 거의 일치한다. 신뢰구간은 비선형 모델보다 약간 더 넓게 나오는데 큰 차이는 없어 보인다. 
+
+신뢰구간을 구할 때 python의 경우 1항과 마찬가지로 직접 함수를 구현하여 계산한다. 
+
+
+#### 문제 2-1-3. 
+::: {.panel-tabset}
+## R
+```{r}
+# Add fitted values and residuals for diagnostics
+teams_bj_aug <- teams_bj %>%
+  mutate(
+    fitted_link = predict(bj_glm, type = "link"),
+    fitted_WPct = predict(bj_glm, type = "response"),
+    deviance_resid = residuals(bj_glm, type = "deviance")
+  )
+
+# i: Residual deviance compared with chi-square distribution
+resid_dev <- deviance(bj_glm)
+resid_df <- df.residual(bj_glm)
+
+deviance_diagnostic <- tibble(
+  residual_deviance = resid_dev,
+  df = resid_df,
+  deviance_over_df = resid_dev / resid_df,
+)
+deviance_diagnostic
+
+
+# ii: Deviance residuals vs linear predictors eta
+ggplot(teams_bj_aug, aes(x = fitted_link, y = deviance_resid)) +
+  geom_point(alpha = 0.6) +
+  geom_hline(
+    yintercept = 0,
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Deviance Residuals vs Linear Predictors",
+    x = expression(hat(beta)[1] * log(RS / RA)),
+    y = "Deviance residual"
+  ) +
+  theme_minimal()
+
+# iii: Observed WPct vs predicted WPct
+ggplot(teams_bj_aug, aes(x = fitted_WPct, y = WPct)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(
+    intercept = 0,
+    slope = 1,
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Observed vs Predicted Winning Percentage",
+    x = "Predicted WPct",
+    y = "Observed WPct"
+  ) +
+  coord_equal() +
+  theme_minimal()
+
+```
+## Python
+```{python}
+# Add fitted values and residuals for diagnostics
+
+# Convert to pandas for statsmodels outputs and plotnine
+teams_bj_pd = teams_bj.to_pandas().copy()
+
+beta1_hat = bj_glm.params[0]
+
+teams_bj_pd["fitted_link"] = beta1_hat * teams_bj_pd["eta"]
+teams_bj_pd["fitted_WPct"] = expit(teams_bj_pd["fitted_link"])
+teams_bj_pd["deviance_resid"] = bj_glm.resid_deviance
+
+teams_bj_aug = pl.from_pandas(teams_bj_pd)
+
+# i: Residual deviance compared with chi-square distribution
+
+resid_dev = bj_glm.deviance
+resid_df = bj_glm.df_resid
+
+deviance_diagnostic = pd.DataFrame({
+    "residual_deviance": [resid_dev],
+    "df": [resid_df],
+    "deviance_over_df": [resid_dev / resid_df]
+})
+print(deviance_diagnostic)
+
+# ii: Deviance residuals vs linear predictors eta
+(
+    ggplot(teams_bj_pd, aes(x="fitted_link", y="deviance_resid"))
+    + geom_point(alpha=0.6)
+    + geom_hline(yintercept=0, linetype="dashed")
+    + labs(
+        title="Deviance Residuals vs Linear Predictors",
+        x="beta_hat_1 * log(RS / RA)",
+        y="Deviance residual"
+    )
+    + theme_minimal()
+)
+
+
+# iii: Observed WPct vs predicted WPct
+(
+    ggplot(teams_bj_pd, aes(x="fitted_WPct", y="WPct"))
+    + geom_point(alpha=0.6)
+    + geom_abline(
+        intercept=0,
+        slope=1,
+        linetype="dashed"
+    )
+    + labs(
+        title="Observed vs Predicted Winning Percentage",
+        x="Predicted WPct",
+        y="Observed WPct"
+    )
+    + coord_equal()
+    + theme_minimal()
+)
+```
+:::
+
+(i)에서 residual deviance 180.26이 asymptotic 카이제곱 자유도 449와 비교했을 때 훨씬 작은 것을 확인할 수 있다. 적합된 모델에 lack of fit 문제는 없다고 볼 수 있다. 
+
+(ii)에서 deviance residual과 linear predictor 사이에 눈에 띄는 패턴이 보이지 않는다. 
+
+(iii)에서 관측된 WPct와 예측된 WPct가 y=x 근처에 특별한 패턴 없이 흩뿌려져 있음을 확인할 수 있다. 
+
+세 가지 결과를 종합해봤을 때 적합된 모형이 적절하다고 결론 내릴 수 있다. 
+
+
+#### 문제 2-1-4. 
+::: {.panel-tabset}
+## R
+```{r}
+teams_bj <- teams_bj %>%
+  mutate(
+    log_RA = log(RA),
+    log_RS = log(RS)
+  )
+
+bj_glm_log <- glm(
+  cbind(W, L) ~ 0 + log_RS + log_RA,
+  data = teams_bj,
+  family = binomial
+)
+
+# Coefficient estimates and confidence intervals
+coef_log <- coef(bj_glm_log)
+coef_log_ci <- confint(
+  bj_glm_log,
+  parm = c("log_RA", "log_RS"),
+  level = 0.95
+)
+
+log_model_result <- tibble(
+  parameter = c("beta_RA", "beta_RS"),
+  term = c("log_RA", "log_RS"),
+  estimate = c(coef_log[["log_RA"]], coef_log[["log_RS"]]),
+  conf.low = c(coef_log_ci["log_RA", 1], coef_log_ci["log_RS", 1]),
+  conf.high = c(coef_log_ci["log_RA", 2], coef_log_ci["log_RS", 2]),
+  conf.level = 0.95
+)
+log_model_result
+
+# Compare with previous models
+comparison_table <- tibble(
+  quantity = c(
+    "k from nls model",
+    "beta_1 from eta-only logistic model",
+    "beta_RS from log(RS), log(RA) model",
+    "- beta_RA from log(RS), log(RA) model",
+    "beta_RA + beta_RS"
+  ),
+  value = c(
+    k_hat,
+    beta1_hat,
+    coef_log[["log_RS"]],
+    -coef_log[["log_RA"]],
+    coef_log[["log_RA"]] + coef_log[["log_RS"]]
+  )
+)
+comparison_table
+
+# Nested model comparison with ANOVA
+anova(bj_glm, bj_glm_log, test="Chisq")
+```
+## Python
+```{python}
+teams_bj = teams_bj.with_columns(
+    pl.col("RA").log().alias("log_RA"),
+    pl.col("RS").log().alias("log_RS")
+)
+
+teams_bj_pd = teams_bj.to_pandas().copy()
+
+y = teams_bj_pd[["W", "L"]]
+X_log = teams_bj_pd[["log_RS", "log_RA"]]   # no intercept
+
+bj_glm_log = sm.GLM(
+    y,
+    X_log,
+    family=sm.families.Binomial()
+).fit()
+
+
+coef_log = bj_glm_log.params
+
+# Profile-likelihood confidence intervals
+# The confidence set for one parameter solves:
+#
+#   2 * {logLik(beta_hat) - profile_logLik(beta_j)} <= chi^2_{1, 0.95}
+#
+# For each fixed beta_j, we maximize over the other coefficient.
+
+W = teams_bj_pd["W"].to_numpy(dtype=float)
+L = teams_bj_pd["L"].to_numpy(dtype=float)
+G = W + L
+
+log_RS = teams_bj_pd["log_RS"].to_numpy(dtype=float)
+log_RA = teams_bj_pd["log_RA"].to_numpy(dtype=float)
+
+X_np = np.column_stack([log_RS, log_RA])
+param_names = ["log_RS", "log_RA"]
+
+beta_hat = coef_log[param_names].to_numpy()
+
+def loglik(beta):
+    """
+    Binomial log-likelihood up to constants.
+
+    p_i = sigmoid(beta_RS * log_RS_i + beta_RA * log_RA_i)
+    W_i ~ Binomial(W_i + L_i, p_i)
+
+    Constants are omitted because they cancel in likelihood-ratio intervals.
+    """
+    linear_pred = X_np @ beta
+    return np.sum(W * linear_pred - G * np.logaddexp(0, linear_pred))
+
+
+ll_hat = loglik(beta_hat)
+lr_cutoff = chi2.ppf(0.95, df=1)
+
+def profile_loglik(fixed_index, fixed_value):
+    """
+    Profile log-likelihood for one fixed coefficient.
+    Since there are only two coefficients, we optimize over the other one.
+    """
+    other_index = 1 - fixed_index
+    other_hat = beta_hat[other_index]
+
+    def objective(other_value):
+        beta = beta_hat.copy()
+        beta[fixed_index] = fixed_value
+        beta[other_index] = other_value
+        return -loglik(beta)
+
+    result = minimize_scalar(
+        objective,
+        bracket=(other_hat - 1, other_hat, other_hat + 1),
+        method="brent"
+    )
+
+    return -result.fun
+
+
+def profile_lr_stat(fixed_index, fixed_value):
+    return 2 * (ll_hat - profile_loglik(fixed_index, fixed_value))
+
+
+def find_profile_bound(fixed_index, direction, initial_step=0.05, max_iter=100):
+    """
+    Find lower or upper profile-likelihood CI bound.
+
+    direction = -1 for lower bound
+    direction =  1 for upper bound
+    """
+    center = beta_hat[fixed_index]
+    step = max(initial_step, abs(center) * 0.05)
+
+    def root_function(value):
+        return profile_lr_stat(fixed_index, value) - lr_cutoff
+
+    for _ in range(max_iter):
+        candidate = center + direction * step
+
+        if root_function(candidate) > 0:
+            if direction < 0:
+                return brentq(root_function, candidate, center)
+            else:
+                return brentq(root_function, center, candidate)
+
+        step *= 1.5
+
+    raise RuntimeError("Could not find profile confidence interval bound.")
+
+
+ci_rows = []
+
+for name in param_names:
+    j = param_names.index(name)
+
+    ci_low = find_profile_bound(j, direction=-1)
+    ci_high = find_profile_bound(j, direction=1)
+
+    ci_rows.append({
+        "term": name,
+        "conf.low": ci_low,
+        "conf.high": ci_high
+    })
+
+coef_log_ci = pd.DataFrame(ci_rows).set_index("term")
+
+log_model_result = pd.DataFrame({
+    "parameter": ["beta_RA", "beta_RS"],
+    "term": ["log_RA", "log_RS"],
+    "estimate": [
+        coef_log["log_RA"],
+        coef_log["log_RS"]
+    ],
+    "conf.low": [
+        coef_log_ci.loc["log_RA", "conf.low"],
+        coef_log_ci.loc["log_RS", "conf.low"]
+    ],
+    "conf.high": [
+        coef_log_ci.loc["log_RA", "conf.high"],
+        coef_log_ci.loc["log_RS", "conf.high"]
+    ],
+    "conf.level": [0.95, 0.95]
+})
+print(log_model_result)
+
+
+comparison_table = pd.DataFrame({
+    "quantity": [
+        "k from nls model",
+        "beta_1 from eta-only logistic model",
+        "beta_RS from log(RS), log(RA) model",
+        "- beta_RA from log(RS), log(RA) model",
+        "beta_RA + beta_RS"
+    ],
+    "value": [
+        k_hat,
+        beta1_hat,
+        coef_log["log_RS"],
+        -coef_log["log_RA"],
+        coef_log["log_RA"] + coef_log["log_RS"]
+    ]
+})
+print(comparison_table)
+
+# ------------------------------------------------------------
+# Equivalent of:
+# anova(bj_glm, bj_glm_log, test = "Chisq")
+# ------------------------------------------------------------
+# This is a likelihood-ratio test comparing the nested models:
+#
+# smaller model:
+#   logit(WPct) = beta_1 * log(RS / RA)
+#
+# larger model:
+#   logit(WPct) = beta_RS * log(RS) + beta_RA * log(RA)
+#
+# The null restriction is:
+#   beta_RS + beta_RA = 0
+
+resid_dev_small = bj_glm.deviance
+resid_dev_large = bj_glm_log.deviance
+
+resid_df_small = bj_glm.df_resid
+resid_df_large = bj_glm_log.df_resid
+
+df_diff = resid_df_small - resid_df_large
+dev_diff = resid_dev_small - resid_dev_large
+p_value = chi2.sf(dev_diff, df=df_diff)
+
+anova_table = pd.DataFrame({
+    "Resid. Df": [resid_df_small, resid_df_large],
+    "Resid. Dev": [resid_dev_small, resid_dev_large],
+    "Df": [np.nan, df_diff],
+    "Deviance": [np.nan, dev_diff],
+    "Pr(>Chi)": [np.nan, p_value]
+}, index=["bj_glm", "bj_glm_log"])
+anova_table.fillna("")
+```
+::: 
+
+우선 비교표에서 눈의 띄는 점은 1항, 2항, 4항의 회귀계수 추정치가 모두 유사하다는 것이다. 
+
+2항에서 했던 로지스틱 회귀는 4항의 회귀모형에서 log(RS)의 회귀계수와 log(RA)의 회귀계수가 절댓값은 같으며 부호가 반대이도록 제약 조건을 건 것과 동일하다. 4항에서는 제약조건을 걸지 않았음에도 두 회귀계수의 절댓값이 거의 같게 나왔으며 부호도 반대이다. 두 모형은 nested 관계에 있으므로 ANOVA로 더 자유로운 모형을 사용하는 것이 필요한지 확인해볼 수 있다. 예상했듯이 p-value가 크므로 제약조건이 더 걸린 간단한 모형으로도 충분하다는 결론을 얻는다. 
+
+
+
 ## 문제 2-2
 
 `WPct`를 반응변수로, `logRS`, `logRA`, `H`, `X2B`, `X3B`, `HR`, `BB`, `SO`, `CS`, `HBP`, `SF`, `ERA`, `CG`, `SHO`, `IPouts`, `HA`, `HRA`, `BBA`, `SOA`, `E`, `DP`, `FP`, `SV`를 설명변수로 하는 절편항이 있는 로지스틱 회귀 모형을 적합하고 AIC를 기준으로 하는 단계별(stepwise) 변수선택을 적용하라. 변수선택 후 남은 변수들을 모두 모형에 남길지 일부를 제거할지 다시 판단하라. 최종적으로 선택된 모형을 문제1의 모형과 비교하라. 
 
 ### 답안
+
+
+#### 문제 2-2. 
+::: {.panel-tabset}
+## R
+```{r}
+candidate_vars <- c(
+  "log_RS", "log_RA",
+  "H", "X2B", "X3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+  "ERA", "CG", "SHO", "IPouts", "HA", "HRA", "BBA", "SOA",
+  "E", "DP", "FP", "SV"
+)
+
+teams_step <- teams_bj %>%
+  dplyr::select(W, L, WPct, all_of(candidate_vars)) %>%
+  drop_na()
+
+# full logistic regression model with intercept
+full_formula <- as.formula(
+  paste(
+    "cbind(W, L) ~",
+    paste(candidate_vars, collapse = " + ")
+  )
+)
+
+full_glm <- glm(
+  full_formula,
+  data = teams_step,
+  family = binomial
+)
+
+# Stepwise AIC selection
+step_glm <- MASS::stepAIC(
+  full_glm,
+  direction = "both",
+  trace = FALSE
+)
+step_glm$anova
+
+# Reconsider selected variables using dropterm()
+dropterm_result <- MASS::dropterm(
+  step_glm,
+  test = "Chisq"
+)
+dropterm_result
+
+step_glm_2 <- update(step_glm, . ~ . - CG)
+MASS::dropterm(step_glm_2, test = "Chisq")
+
+final_glm <- step_glm_2
+summary(final_glm)
+
+```
+## Python
+```{python}
+# R과 이름 약간 다른 변수들 존재. 
+candidate_vars = [
+    "log_RS", "log_RA",
+    "H", "2B", "3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+    "ERA", "CG", "SHO", "IPOuts", "HA", "HRA", "BBA", "SOA",
+    "E", "DP", "FP", "SV"
+]
+
+teams_step = (
+  teams_bj
+  .select(["W", "L", "WPct"] + candidate_vars)
+  .drop_nulls()
+  .to_pandas()
+)
+
+# Make sure all modeling columns are numeric.
+for col in ["W", "L", "WPct"] + candidate_vars:
+    teams_step[col] = pd.to_numeric(teams_step[col], errors="coerce")
+
+
+# Helper functions
+def fit_grouped_binomial_glm(data, terms, intercept=True):
+    """
+    Python equivalent of:
+        glm(cbind(W, L) ~ ..., data = data, family = binomial)
+    """
+
+    y = data[["W", "L"]].to_numpy(dtype=float)
+
+    if len(terms) == 0:
+        X = pd.DataFrame(index=data.index)
+    else:
+        X = data[terms].copy()
+
+    if intercept:
+        X = sm.add_constant(X, has_constant="add")
+
+    model = sm.GLM(
+        y,
+        X,
+        family=sm.families.Binomial()
+    ).fit(
+        method="IRLS",
+        maxiter=25,
+        tol=1e-8
+    )
+
+    return model
+
+
+def formula_string(terms, intercept=True):
+    if len(terms) == 0:
+        rhs = "1" if intercept else "0"
+    else:
+        rhs = " + ".join(terms)
+        if not intercept:
+            rhs = "0 + " + rhs
+
+    return "cbind(W, L) ~ " + rhs
+
+
+def stepwise_aic(data, candidate_terms, start_terms=None, intercept=True, trace=False):
+    """
+    Python analogue of:
+        MASS::stepAIC(full_glm, direction = "both", trace = FALSE)
+    """
+
+    if start_terms is None:
+        current_terms = candidate_terms.copy()
+    else:
+        current_terms = start_terms.copy()
+
+    current_model = fit_grouped_binomial_glm(
+        data=data,
+        terms=current_terms,
+        intercept=intercept
+    )
+
+    path = [{
+        "Action": "Start",
+        "Term": "<none>",
+        "Df_Model": current_model.df_model,
+        "Resid_Df": current_model.df_resid,
+        "Deviance": current_model.deviance,
+        "AIC": current_model.aic
+    }]
+
+    while True:
+        current_aic = current_model.aic
+        possible_moves = []
+
+        # Try dropping each current term
+        for term in current_terms:
+            trial_terms = [t for t in current_terms if t != term]
+
+            try:
+                trial_model = fit_grouped_binomial_glm(
+                    data=data,
+                    terms=trial_terms,
+                    intercept=intercept
+                )
+
+                possible_moves.append({
+                    "Action": "Drop",
+                    "Term": term,
+                    "Terms": trial_terms,
+                    "Model": trial_model,
+                    "AIC": trial_model.aic
+                })
+            except Exception as e:
+                if trace:
+                    print(f"Drop {term} failed: {e}")
+
+        # Try adding each absent term
+        for term in candidate_terms:
+            if term not in current_terms:
+                trial_terms = current_terms + [term]
+
+                try:
+                    trial_model = fit_grouped_binomial_glm(
+                        data=data,
+                        terms=trial_terms,
+                        intercept=intercept
+                    )
+
+                    possible_moves.append({
+                        "Action": "Add",
+                        "Term": term,
+                        "Terms": trial_terms,
+                        "Model": trial_model,
+                        "AIC": trial_model.aic
+                    })
+                except Exception as e:
+                    if trace:
+                        print(f"Add {term} failed: {e}")
+
+        if len(possible_moves) == 0:
+            break
+
+        best_move = min(possible_moves, key=lambda d: d["AIC"])
+
+        if best_move["AIC"] < current_aic - 1e-8:
+            current_terms = best_move["Terms"]
+            current_model = best_move["Model"]
+
+            path.append({
+                "Action": best_move["Action"],
+                "Term": best_move["Term"],
+                "Df_Model": current_model.df_model,
+                "Resid_Df": current_model.df_resid,
+                "Deviance": current_model.deviance,
+                "AIC": current_model.aic
+            })
+
+            if trace:
+                print(
+                    f"{best_move['Action']} {best_move['Term']}: "
+                    f"AIC = {current_model.aic:.4f}"
+                )
+        else:
+            break
+
+    return current_model, current_terms, pd.DataFrame(path)
+
+
+def dropterm(data, model, terms, intercept=True):
+    """
+    Python analogue of:
+        MASS::dropterm(model, test = "Chisq")
+
+    For each term, fit the reduced model obtained by dropping that term.
+    """
+
+    rows = [{
+        "term": "<none>",
+        "Df": np.nan,
+        "Deviance": model.deviance,
+        "AIC": model.aic,
+        "LRT": np.nan,
+        "Pr(>Chi)": np.nan
+    }]
+
+    for term in terms:
+        reduced_terms = [t for t in terms if t != term]
+
+        reduced_model = fit_grouped_binomial_glm(
+            data=data,
+            terms=reduced_terms,
+            intercept=intercept
+        )
+
+        df_diff = reduced_model.df_resid - model.df_resid
+        lrt_stat = reduced_model.deviance - model.deviance
+        p_value = chi2.sf(lrt_stat, df=df_diff)
+
+        rows.append({
+            "term": term,
+            "Df": df_diff,
+            "Deviance": reduced_model.deviance,
+            "AIC": reduced_model.aic,
+            "LRT": lrt_stat,
+            "Pr(>Chi)": p_value
+        })
+
+    return pd.DataFrame(rows)
+
+# helper functions 부분 끝. 
+
+# full logistic regression model with intercept
+full_glm = fit_grouped_binomial_glm(
+    data=teams_step,
+    terms=candidate_vars,
+    intercept=True
+)
+
+# Stepwise AIC selection
+step_glm, step_terms, step_glm_anova = stepwise_aic(
+    data=teams_step,
+    candidate_terms=candidate_vars,
+    start_terms=candidate_vars,
+    intercept=True,
+    trace=False
+)
+print(step_glm_anova)
+
+
+# Reconsider selected variables using dropterm()
+dropterm_result = dropterm(
+    data=teams_step,
+    model=step_glm,
+    terms=step_terms,
+    intercept=True
+)
+print(dropterm_result)
+
+
+# Equivalent of:
+# step_glm_2 <- update(step_glm, . ~ . - CG)
+# MASS::dropterm(step_glm_2, test = "Chisq")
+step_terms_2 = [term for term in step_terms if term != "CG"]
+
+step_glm_2 = fit_grouped_binomial_glm(
+    data=teams_step,
+    terms=step_terms_2,
+    intercept=True
+)
+dropterm_result_2 = dropterm(
+    data=teams_step,
+    model=step_glm_2,
+    terms=step_terms_2,
+    intercept=True
+)
+print(dropterm_result_2)
+
+
+final_glm = step_glm_2
+final_terms = step_terms_2
+print(final_glm.summary())
+
+```
+:::
+
+stepwise AIC로 얻은 설명변수는 log_RS, log_RA, CG, SHO, SV 의 다섯 개이다. 강의자료처럼 dropterm()을 활용해 추가적으로 제거해도 괜찮은 변수가 없을지 살펴보았다. CG의 경우 제거하여도 AIC 상승폭이 굉장히 작고, 가능도비 검정도 0.05 수준에서 유의하지 않다. 따라서 CG 변수를 제거해보았다. 그러고 나서 다시 한 번 dropterm()을 확인해보니 이제는 모든 설명변수가 유의하다는 결론을 얻을 수 있었다. 
+
+다만 한 가지 주의해야할 부분은 SHO(Shutouts)와 SV(Saves)는 모두 팀이 승리해야만 쌓이는 통계이다. 따라서 팀의 연간 승률과 관계있는 변수가 무엇인지 분석할 때는 괜찮지만, 팀의 승률을 predict할 때는 leakage를 일으키는 변수가 될 수 있으므로 주의해야 한다. 
+
+문제 2-1에서 고려한 모델인 log_RS와 log_RA를 설명변수로 하는 모델과 비교했을 때 2개의 설명변수가 추가되었다. 문제 2-2에서는 절편항도 존재한다는 차이가 있다. 그럼에도 2-2 모형에서도 log_RS의 계수는 양수, log_RA의 계수는 음수이며 둘의 절댓값도 크게 다르지 않다는 점에서는 유사성이 있다. 
+
+
 
 ## 문제 2-3
 
@@ -113,6 +1704,444 @@ $$
 2.  `W`를 반응변수로 하여 문제2의 분석을 실시하되 음이항 회귀모형을 사용하라. 모형 적합 시 오류가 발생하면 이유를 파악해서 보고하라.
 
 ### 답안
+
+#### 문제 2-3-1. 
+::: {.panel-tabset}
+## R
+```{r}
+candidate_vars <- c(
+  "log_RS", "log_RA",
+  "H", "X2B", "X3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+  "ERA", "CG", "SHO", "IPouts", "HA", "HRA", "BBA", "SOA",
+  "E", "DP", "FP", "SV"
+)
+
+teams_count <- teams_step
+
+# Poisson regression model for W
+poisson_full_formula <- as.formula(
+  paste(
+    "W ~",
+    paste(candidate_vars, collapse = " + ")
+  )
+)
+poisson_full <- glm(
+  poisson_full_formula,
+  data = teams_count,
+  family = poisson
+)
+
+# Stepwise AIC selection
+poisson_step <- MASS::stepAIC(
+  poisson_full,
+  direction = "both",
+  trace = FALSE
+)
+poisson_step$anova
+
+# Reconsider selected variables using dropterm()
+poisson_dropterm <- MASS::dropterm(poisson_step, test = "Chisq")
+poisson_dropterm
+
+poisson_step_2 <- update(poisson_step, . ~ . - CG)
+MASS::dropterm(poisson_step_2, test = "Chisq")
+
+poisson_step_3 <- update(poisson_step_2, . ~ . - E)
+MASS::dropterm(poisson_step_3, test = "Chisq")
+
+poisson_final <- poisson_step_3
+summary(poisson_final)
+
+```
+## Python
+```{python}
+candidate_vars = [
+    "log_RS", "log_RA",
+    "H", "2B", "3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+    "ERA", "CG", "SHO", "IPOuts", "HA", "HRA", "BBA", "SOA",
+    "E", "DP", "FP", "SV"
+]
+
+teams_count = (
+    teams_bj
+    .select(["W", "L", "WPct"] + candidate_vars)
+    .drop_nulls()
+    .to_pandas()
+)
+
+for col in ["W", "L", "WPct"] + candidate_vars:
+    teams_count[col] = pd.to_numeric(teams_count[col], errors="coerce")
+
+# Helper functions for Poisson GLM
+def fit_poisson_glm(data, terms, intercept=True):
+    """
+    Python equivalent of:
+        glm(W ~ ..., data = data, family = poisson)
+    """
+
+    y = data["W"].to_numpy(dtype=float)
+
+    if len(terms) == 0:
+        X = pd.DataFrame(index=data.index)
+    else:
+        X = data[terms].copy()
+
+    if intercept:
+        X = sm.add_constant(X, has_constant="add")
+
+    model = sm.GLM(
+        y,
+        X,
+        family=sm.families.Poisson()
+    ).fit(
+        method="IRLS",
+        maxiter=25,
+        tol=1e-8
+    )
+
+    return model
+
+
+def poisson_formula_string(terms, intercept=True):
+    if len(terms) == 0:
+        rhs = "1" if intercept else "0"
+    else:
+        rhs = " + ".join(terms)
+        if not intercept:
+            rhs = "0 + " + rhs
+
+    return "W ~ " + rhs
+
+
+def stepwise_aic_poisson(data, candidate_terms, start_terms=None, intercept=True, trace=False):
+    """
+    Python analogue of:
+        MASS::stepAIC(full_glm, direction = "both", trace = FALSE)
+    """
+
+    if start_terms is None:
+        current_terms = candidate_terms.copy()
+    else:
+        current_terms = start_terms.copy()
+
+    current_model = fit_poisson_glm(
+        data=data,
+        terms=current_terms,
+        intercept=intercept
+    )
+
+    path = [{
+        "Action": "Start",
+        "Term": "<none>",
+        "Df_Model": current_model.df_model,
+        "Resid_Df": current_model.df_resid,
+        "Deviance": current_model.deviance,
+        "AIC": current_model.aic
+    }]
+
+    while True:
+        current_aic = current_model.aic
+        possible_moves = []
+
+        for term in current_terms:
+            trial_terms = [t for t in current_terms if t != term]
+
+            try:
+                trial_model = fit_poisson_glm(
+                    data=data,
+                    terms=trial_terms,
+                    intercept=intercept
+                )
+
+                possible_moves.append({
+                    "Action": "Drop",
+                    "Term": term,
+                    "Terms": trial_terms,
+                    "Model": trial_model,
+                    "AIC": trial_model.aic
+                })
+            except Exception as e:
+                if trace:
+                    print(f"Drop {term} failed: {e}")
+
+        for term in candidate_terms:
+            if term not in current_terms:
+                trial_terms = current_terms + [term]
+
+                try:
+                    trial_model = fit_poisson_glm(
+                        data=data,
+                        terms=trial_terms,
+                        intercept=intercept
+                    )
+
+                    possible_moves.append({
+                        "Action": "Add",
+                        "Term": term,
+                        "Terms": trial_terms,
+                        "Model": trial_model,
+                        "AIC": trial_model.aic
+                    })
+                except Exception as e:
+                    if trace:
+                        print(f"Add {term} failed: {e}")
+
+        if len(possible_moves) == 0:
+            break
+
+        best_move = min(possible_moves, key=lambda d: d["AIC"])
+
+        if best_move["AIC"] < current_aic - 1e-8:
+            current_terms = best_move["Terms"]
+            current_model = best_move["Model"]
+
+            path.append({
+                "Action": best_move["Action"],
+                "Term": best_move["Term"],
+                "Df_Model": current_model.df_model,
+                "Resid_Df": current_model.df_resid,
+                "Deviance": current_model.deviance,
+                "AIC": current_model.aic
+            })
+
+            if trace:
+                print(
+                    f"{best_move['Action']} {best_move['Term']}: "
+                    f"AIC = {current_model.aic:.4f}"
+                )
+        else:
+            break
+
+    return current_model, current_terms, pd.DataFrame(path)
+
+
+def dropterm_poisson(data, model, terms, intercept=True):
+    """
+    Python analogue of:
+        MASS::dropterm(model, test = "Chisq")
+    """
+
+    rows = [{
+        "term": "<none>",
+        "Df": np.nan,
+        "Deviance": model.deviance,
+        "AIC": model.aic,
+        "LRT": np.nan,
+        "Pr(>Chi)": np.nan
+    }]
+
+    for term in terms:
+        reduced_terms = [t for t in terms if t != term]
+
+        reduced_model = fit_poisson_glm(
+            data=data,
+            terms=reduced_terms,
+            intercept=intercept
+        )
+
+        df_diff = reduced_model.df_resid - model.df_resid
+        lrt_stat = reduced_model.deviance - model.deviance
+        p_value = chi2.sf(lrt_stat, df=df_diff)
+
+        rows.append({
+            "term": term,
+            "Df": df_diff,
+            "Deviance": reduced_model.deviance,
+            "AIC": reduced_model.aic,
+            "LRT": lrt_stat,
+            "Pr(>Chi)": p_value
+        })
+
+    return pd.DataFrame(rows)
+
+
+# Full Poisson model with intercept
+poisson_full = fit_poisson_glm(
+    data=teams_count,
+    terms=candidate_vars,
+    intercept=True
+)
+
+# Stepwise AIC selection
+poisson_step, poisson_terms, poisson_step_anova = stepwise_aic_poisson(
+    data=teams_count,
+    candidate_terms=candidate_vars,
+    start_terms=candidate_vars,
+    intercept=True,
+    trace=False
+)
+print(poisson_step_anova)
+
+# Reconsider selected variables using dropterm()
+poisson_dropterm_result = dropterm_poisson(
+    data=teams_count,
+    model=poisson_step,
+    terms=poisson_terms,
+    intercept=True
+)
+print(poisson_dropterm_result)
+
+
+poisson_terms_2 = [term for term in poisson_terms if term != "CG"]
+poisson_step_2 = fit_poisson_glm(
+    data=teams_count,
+    terms=poisson_terms_2,
+    intercept=True
+)
+poisson_dropterm_result_2 = dropterm_poisson(
+    data=teams_count,
+    model=poisson_step_2,
+    terms=poisson_terms_2,
+    intercept=True
+)
+print(poisson_dropterm_result_2)
+
+poisson_terms_3 = [term for term in poisson_terms_2 if term != "E"]
+poisson_step_3 = fit_poisson_glm(
+    data=teams_count,
+    terms=poisson_terms_3,
+    intercept=True
+)
+poisson_dropterm_result_3 = dropterm_poisson(
+    data=teams_count,
+    model=poisson_step_3,
+    terms=poisson_terms_3,
+    intercept=True
+)
+print(poisson_dropterm_result_3)
+
+final_poisson = poisson_step_3
+print(final_poisson.summary())
+
+```
+:::
+
+
+stepwise AIC로 얻은 설명변수는 log_RS, ERA, CG, E, SV 의 다섯 개이다. 강의자료처럼 dropterm()을 활용해 추가적으로 제거해도 괜찮은 변수가 없을지 살펴보았다. CG의 경우 제거하여도 AIC 상승폭이 굉장히 작고, 가능도비 검정도 0.05 수준에서 유의하지 않다. 따라서 CG 변수를 제거해보았다. 그러고 나서 다시 한 번 dropterm()을 확인해보니 이번에는 E가 유의하지 않아서 또 제거하였다. 그리고 다시 dropterm()을 실행하니 모든 설명변수가 유의하다는 결론을 얻을 수 있었다. 따라서 최종적으로 log_RS, ERA, SV가 남았다.  
+
+위에서와 마찬가지로 주의해야할 부분은 SV(Saves)는 팀이 승리해야만 쌓이는 통계이다. 따라서 팀의 연간 승리 횟수와 관계있는 변수가 무엇인지 분석할 때는 괜찮지만, 팀의 승리 횟수를 predict할 때는 leakage를 일으키는 변수가 될 수 있으므로 주의해야 한다. 
+
+문제 2-2의 모형과 비교했을 때 log_RA가 설명변수에서 빠진 것이 눈에 띈다. RA(Runs Allowed)가 빠졌지만 ERA(Earned Run Average)가 남았고 이 두 변수는 둘 다 팀의 실점에 관한 변수이므로 팀의 총 실점은 여전히 중요한 설명변수임을 알 수 있다. 
+
+
+#### 문제 2-3-2. 
+::: {.panel-tabset}
+## R
+```{r}
+# 음이항 regression model for W
+nb_warnings <- character()
+nb_full <- withCallingHandlers(
+  tryCatch(
+    {
+      MASS::glm.nb(
+        poisson_full_formula,
+        data = teams_count,
+        control = glm.control(maxit = 100)
+      )
+    },
+    error = function(e) e
+  ),
+  warning = function(w) {
+    nb_warnings <<- c(nb_warnings, conditionMessage(w))
+    invokeRestart("muffleWarning")
+  }
+)
+
+nb_warnings # Negative binomial warnings during full-model fitting
+
+inherits(nb_full, "error")
+nb_full$message
+
+```
+## Python
+```{python}
+# statsmodels NegativeBinomial estimates alpha:
+#     Var(W_i) = mu_i + alpha * mu_i^2
+
+candidate_vars = [
+    "log_RS", "log_RA",
+    "H", "2B", "3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+    "ERA", "CG", "SHO", "IPOuts", "HA", "HRA", "BBA", "SOA",
+    "E", "DP", "FP", "SV"
+]
+
+teams_nb = (
+    teams_bj
+    .select(["W", "L", "WPct"] + candidate_vars)
+    .drop_nulls()
+    .to_pandas()
+)
+for col in ["W", "L", "WPct"] + candidate_vars:
+    teams_nb[col] = pd.to_numeric(teams_nb[col], errors="coerce")
+
+# Fit full negative binomial model and collect warnings/errors
+def fit_full_negative_binomial_with_report(data, terms, intercept=True, maxiter=100):
+    y = data["W"].to_numpy(dtype=float)
+
+    X = data[terms].copy()
+    if intercept:
+        X = sm.add_constant(X, has_constant="add")
+
+    warning_messages = []
+    result = None
+    error_message = None
+
+    try:
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            warnings.simplefilter("always")
+
+            nb_model = NegativeBinomial(
+                endog=y,
+                exog=X,
+                loglike_method="nb2"
+            )
+
+            result = nb_model.fit(
+                maxiter=maxiter,
+                disp=False
+            )
+
+            warning_messages = [
+                str(w.message) for w in caught_warnings
+            ]
+
+    except Exception as e:
+        error_message = str(e)
+
+    return result, warning_messages, error_message
+
+
+nb_full, nb_warnings, nb_error = fit_full_negative_binomial_with_report(
+    data=teams_nb,
+    terms=candidate_vars,
+    intercept=True,
+    maxiter=100
+)
+
+# Inspect whether the returned result is reliable
+result_returned = nb_full is not None
+if result_returned:
+    mle_retvals = getattr(nb_full, "mle_retvals", {})
+    converged = mle_retvals.get("converged", False)
+else:
+    mle_retvals = {}
+    converged = False
+print(converged)
+
+# Print warnings and error messages
+if len(nb_warnings) == 0:
+    print("No warnings captured.")
+else:
+    for i, msg in enumerate(nb_warnings, start=1):
+        print(f"{i}. {msg}")
+
+```
+:::
+
+음이항 모형은 $\mu$만 추정하는 포아송 모형과 달리 $\theta$ 까지 추정의 대상이다. Full model에서는 많은 설명변수들이 비슷한 정보를 담고 있어서 서로 correlation이 높고, 따라서 mean의 추정도 불안정하다. 이러한 상황에서 $\theta$의 추정은 더욱 불안정해진다. 이것이 full model을 음이항 모형으로 적합했을 때 적합이 실패한 이유로 추정된다. 
+
+출력된 warning와 error로부터 조금 더 구체적으로 추측해보면, $\theta$의 추정치가 수렴하지 못하고 계속 변화하다가 boundary인 0을 넘어가게 되어 "truncated at zero"가 발생했고, 그러면서 가능도 계산 등에서 NaN 같은 문제가 생겼을 것이다. 그러면서 수렴여부를 확인하는 if문 등에서 boolean이 있어야 할 곳에 NaN 이 들어가면서 "missing value where TRUE/FALSE needed"와 같은 에러가 발생한 것으로 예상된다. Python의 경우에도 비슷한 종류의 warning과 error가 발생한다.  
+
 
 ## 문제 2-4
 
@@ -126,6 +2155,313 @@ $$
 
 
 ### 답안
+
+#### 문제 2-4. 
+
+문제 2-1-2와 모형이 유사하다.
+
+$$
+  logit(WPct) = k \log({\frac{RS}{RA}}) + g \log({\frac{RS}{RA}}) \mathbb{I}(1994 \le t \le 2005)  
+$$
+
+::: {.panel-tabset}
+## R
+```{r}
+# Model: 
+#   cbind(W, L) ~ 0 + eta + eta_steroid
+#
+# where eta_steroid = eta * I_steroid.
+
+teams_era <- Teams %>%
+  filter(
+    (
+      yearID >= 1994 & yearID <= 2005
+    ) |
+      (
+        yearID >= 2010 & yearID <= 2025
+      ),
+    yearID != 2020
+  ) %>%
+  mutate(
+    RS = R,
+    WPct = W / (W + L),
+    steroid_era = if_else(yearID >= 1994 & yearID <= 2005, 1L, 0L),
+    eta = log(RS / RA),
+    eta_steroid = eta * steroid_era
+  ) %>%
+  filter(
+    !is.na(W),
+    !is.na(L),
+    !is.na(WPct),
+    !is.na(RS),
+    !is.na(RA),
+    W + L > 0,
+    RS > 0,
+    RA > 0
+  )
+
+bj_era_glm <- glm(
+  cbind(W, L) ~ 0 + eta + eta_steroid,
+  data = teams_era,
+  family = binomial
+)
+
+# Extract estimates
+coef_era <- coef(bj_era_glm)
+k_hat <- coef_era[["eta"]]
+g_hat <- coef_era[["eta_steroid"]]
+
+coef_ci <- confint(
+  bj_era_glm,
+  parm = c("eta", "eta_steroid"),
+  level = 0.95
+)
+
+era_result <- tibble(
+  parameter = c("k", "g"),
+  estimate = c(
+    k_hat,
+    g_hat
+  ),
+  conf.low = c(
+    coef_ci["eta", 1],
+    coef_ci["eta_steroid", 1]
+  ),
+  conf.high = c(
+    coef_ci["eta", 2],
+    coef_ci["eta_steroid", 2]
+  ),
+  conf.level = 0.95
+)
+era_result
+
+
+# Test H0: g = 0
+bj_era_glm_null <- glm(
+  cbind(W, L) ~ 0 + eta,
+  data = teams_era,
+  family = binomial
+)
+era_lrt <- anova(
+  bj_era_glm_null,
+  bj_era_glm,
+  test = "Chisq"
+)
+era_lrt
+
+
+```
+## Python
+```{python}
+teams_era = (
+    Teams
+    .filter(
+        (
+            ((pl.col("yearID") >= 1994) & (pl.col("yearID") <= 2005)) |
+            ((pl.col("yearID") >= 2010) & (pl.col("yearID") <= 2025))
+        ) &
+        (pl.col("yearID") != 2020)
+    )
+    .with_columns(
+        pl.col("R").alias("RS"),
+        (pl.col("W") / (pl.col("W") + pl.col("L"))).alias("WPct"),
+        pl.when((pl.col("yearID") >= 1994) & (pl.col("yearID") <= 2005))
+          .then(1)
+          .otherwise(0)
+          .alias("steroid_era")
+    )
+    .filter(
+        (pl.col("W") + pl.col("L") > 0) &
+        (pl.col("R") > 0) &
+        (pl.col("RA") > 0)
+    )
+    .with_columns(
+        (pl.col("RS") / pl.col("RA")).log().alias("eta")
+    )
+    .with_columns(
+        (pl.col("eta") * pl.col("steroid_era")).alias("eta_steroid")
+    )
+    .select([
+        "yearID", "teamID", "W", "L", "WPct",
+        "RS", "RA", "steroid_era", "eta", "eta_steroid"
+    ])
+    .drop_nulls()
+)
+
+teams_era_pd = teams_era.to_pandas()
+
+for col in ["W", "L", "WPct", "RS", "RA", "steroid_era", "eta", "eta_steroid"]:
+    teams_era_pd[col] = pd.to_numeric(teams_era_pd[col], errors="coerce")
+
+# Fit full model:
+#      logit(WPct) = k * eta + g * eta_steroid
+y = teams_era_pd[["W", "L"]].to_numpy(dtype=float)
+
+X_full = teams_era_pd[["eta", "eta_steroid"]].to_numpy(dtype=float)
+
+bj_era_glm = sm.GLM(
+    y,
+    X_full,
+    family=sm.families.Binomial()
+).fit(
+    method="IRLS",
+    maxiter=25,
+    tol=1e-8
+)
+
+k_hat = bj_era_glm.params[0]
+g_hat = bj_era_glm.params[1]
+
+# Profile-likelihood confidence intervals for k and g
+# For fixed beta_j, maximize log-likelihood over the other coefficient.
+# Then solve:
+#   2 * {logLik(beta_hat) - profile_logLik(beta_j)} = chi^2_{1, .95}
+W = teams_era_pd["W"].to_numpy(dtype=float)
+L = teams_era_pd["L"].to_numpy(dtype=float)
+G = W + L
+
+eta = teams_era_pd["eta"].to_numpy(dtype=float)
+eta_steroid = teams_era_pd["eta_steroid"].to_numpy(dtype=float)
+
+X_np = np.column_stack([eta, eta_steroid])
+beta_hat = np.array([k_hat, g_hat])
+
+def loglik(beta):
+    """
+    Binomial log-likelihood up to constants.
+
+    p_i = sigmoid(beta[0] * eta_i + beta[1] * eta_steroid_i)
+    W_i ~ Binomial(W_i + L_i, p_i)
+
+    Constants do not matter for likelihood-ratio confidence intervals.
+    """
+    linear_pred = X_np @ beta
+    return np.sum(W * linear_pred - G * np.logaddexp(0, linear_pred))
+
+ll_hat = loglik(beta_hat)
+lr_cutoff = chi2.ppf(0.95, df=1)
+
+def profile_loglik(fixed_index, fixed_value):
+    """
+    Profile log-likelihood for one fixed coefficient.
+    Since there are only two coefficients, optimize over the other one.
+    """
+    other_index = 1 - fixed_index
+    other_hat = beta_hat[other_index]
+
+    def objective(other_value):
+        beta = beta_hat.copy()
+        beta[fixed_index] = fixed_value
+        beta[other_index] = other_value
+        return -loglik(beta)
+
+    result = minimize_scalar(
+        objective,
+        bracket=(other_hat - 1, other_hat, other_hat + 1),
+        method="brent"
+    )
+
+    return -result.fun
+
+def profile_lr_stat(fixed_index, fixed_value):
+    return 2 * (ll_hat - profile_loglik(fixed_index, fixed_value))
+
+def find_profile_bound(fixed_index, direction, initial_step=0.05, max_iter=100):
+    center = beta_hat[fixed_index]
+    step = max(initial_step, abs(center) * 0.05)
+
+    def root_function(value):
+        return profile_lr_stat(fixed_index, value) - lr_cutoff
+
+    for _ in range(max_iter):
+        candidate = center + direction * step
+
+        if root_function(candidate) > 0:
+            if direction < 0:
+                return brentq(root_function, candidate, center)
+            else:
+                return brentq(root_function, center, candidate)
+
+        step *= 1.5
+
+    raise RuntimeError("Could not find profile confidence interval bound.")
+
+k_ci_low = find_profile_bound(fixed_index=0, direction=-1)
+k_ci_high = find_profile_bound(fixed_index=0, direction=1)
+
+g_ci_low = find_profile_bound(fixed_index=1, direction=-1)
+g_ci_high = find_profile_bound(fixed_index=1, direction=1)
+
+era_result = pd.DataFrame({
+    "parameter": ["k", "g"],
+    "estimate": [
+        k_hat,
+        g_hat
+    ],
+    "conf.low": [
+        k_ci_low,
+        g_ci_low
+    ],
+    "conf.high": [
+        k_ci_high,
+        g_ci_high
+    ],
+    "conf.level": [
+        0.95,
+        0.95
+    ]
+})
+print(era_result)
+
+
+# Test H0: g = 0
+X_null = teams_era_pd[["eta"]].to_numpy(dtype=float)
+
+bj_era_glm_null = sm.GLM(
+    y,
+    X_null,
+    family=sm.families.Binomial()
+).fit(
+    method="IRLS",
+    maxiter=25,
+    tol=1e-8
+)
+
+dev_diff = bj_era_glm_null.deviance - bj_era_glm.deviance
+df_diff = bj_era_glm_null.df_resid - bj_era_glm.df_resid
+p_value = chi2.sf(dev_diff, df=df_diff)
+
+era_lrt = pd.DataFrame({
+    "Resid. Df": [
+        bj_era_glm_null.df_resid,
+        bj_era_glm.df_resid
+    ],
+    "Resid. Dev": [
+        bj_era_glm_null.deviance,
+        bj_era_glm.deviance
+    ],
+    "Df": [
+        np.nan,
+        df_diff
+    ],
+    "Deviance": [
+        np.nan,
+        dev_diff
+    ],
+    "Pr(>Chi)": [
+        np.nan,
+        p_value
+    ]
+}, index=["H0: g = 0 model", "Full era-difference model"])
+
+print(era_lrt.fillna(""))
+
+```
+:::
+
+g가 추가된 모델과 그렇지 않은 nested 관계의 두 모델에 대한 analysis of deviance를 수행했을 때 p-value는 0.03 정도로 0.05 수준에서 g는 유의하다. 95% 프로파일링 신뢰구간을 살펴봐도 g의 신뢰구간에 0이 포함되지 않는다. 따라서 두 시대(스테로이드 시대와 최근) 사이에 모형의 계수가 다르다고 결론 내릴 수 있다. 
+
+
 
 # 3부  데이터 분석 기술
 
@@ -189,6 +2525,8 @@ EXPOSE 8888
 
 ### 답안
 
+![Dockerfile](./problem3_images/problem3_1.png)
+
 ## 문제 3-2. GitHub Actions 워크플로우 수정
 
 숙제 2에서 만들었던 `publish.yml`을 수정하여 기존의 배포 단계 끝에 Docker 컨테이너 이미지를 빌드하고 Github Container Registry (GHCR)에 푸시하는 단계를 추가한다.
@@ -212,6 +2550,8 @@ EXPOSE 8888
 ```
 
 ### 답안
+
+![publish.yml](./problem3_images/problem3_2.png)
 
 ## 문제 3-3. GitHub Pages에 Binder 링크 추가
 
