@@ -4991,12 +4991,9 @@ window.Quarto = {
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.special <span class="im">import</span> expit</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> patsy.contrasts <span class="im">import</span> Treatment</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pylahman</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares, brentq, minimize_scalar</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> t, norm, chi2</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares, brentq, minimize_scalar</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> t, norm, chi2</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -5704,8 +5701,7 @@ current_smoker ~ Education + HardDrugs + MaritalStatus + Alcohol12PlusYr +
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># python 패키지의 데이터프레임과 동일한 데이터인지 확인 위해. </span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(Teams)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(Teams)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3614   48</code></pre>
 </div>
@@ -5780,9 +5776,8 @@ current_smoker ~ Education + HardDrugs + MaritalStatus + Alcohol12PlusYr +
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Teams_pd <span class="op">=</span> pylahman.Teams()</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>Teams <span class="op">=</span> pl.from_pandas(Teams_pd)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Teams.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Teams <span class="op">=</span> pl.from_pandas(r.Teams)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Teams.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(3614, 48)</code></pre>
 </div>
@@ -6686,241 +6681,240 @@ Number of Fisher Scoring iterations: 3</code></pre>
 </div>
 <div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># R과 이름 약간 다른 변수들 존재. </span></span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>candidate_vars <span class="op">=</span> [</span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;log_RS&quot;</span>, <span class="st">&quot;log_RA&quot;</span>,</span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;H&quot;</span>, <span class="st">&quot;2B&quot;</span>, <span class="st">&quot;3B&quot;</span>, <span class="st">&quot;HR&quot;</span>, <span class="st">&quot;BB&quot;</span>, <span class="st">&quot;SO&quot;</span>, <span class="st">&quot;CS&quot;</span>, <span class="st">&quot;HBP&quot;</span>, <span class="st">&quot;SF&quot;</span>,</span>
-<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ERA&quot;</span>, <span class="st">&quot;CG&quot;</span>, <span class="st">&quot;SHO&quot;</span>, <span class="st">&quot;IPOuts&quot;</span>, <span class="st">&quot;HA&quot;</span>, <span class="st">&quot;HRA&quot;</span>, <span class="st">&quot;BBA&quot;</span>, <span class="st">&quot;SOA&quot;</span>,</span>
-<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E&quot;</span>, <span class="st">&quot;DP&quot;</span>, <span class="st">&quot;FP&quot;</span>, <span class="st">&quot;SV&quot;</span></span>
-<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>teams_step <span class="op">=</span> (</span>
-<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>  teams_bj</span>
-<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>  .select([<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars)</span>
-<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>  .drop_nulls()</span>
-<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>  .to_pandas()</span>
-<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-16"><a href="#cb63-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure all modeling columns are numeric.</span></span>
-<span id="cb63-17"><a href="#cb63-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> [<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars:</span>
-<span id="cb63-18"><a href="#cb63-18" aria-hidden="true" tabindex="-1"></a>    teams_step[col] <span class="op">=</span> pd.to_numeric(teams_step[col], errors<span class="op">=</span><span class="st">&quot;coerce&quot;</span>)</span>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>candidate_vars <span class="op">=</span> [</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;log_RS&quot;</span>, <span class="st">&quot;log_RA&quot;</span>,</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;H&quot;</span>, <span class="st">&quot;X2B&quot;</span>, <span class="st">&quot;X3B&quot;</span>, <span class="st">&quot;HR&quot;</span>, <span class="st">&quot;BB&quot;</span>, <span class="st">&quot;SO&quot;</span>, <span class="st">&quot;CS&quot;</span>, <span class="st">&quot;HBP&quot;</span>, <span class="st">&quot;SF&quot;</span>,</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ERA&quot;</span>, <span class="st">&quot;CG&quot;</span>, <span class="st">&quot;SHO&quot;</span>, <span class="st">&quot;IPouts&quot;</span>, <span class="st">&quot;HA&quot;</span>, <span class="st">&quot;HRA&quot;</span>, <span class="st">&quot;BBA&quot;</span>, <span class="st">&quot;SOA&quot;</span>,</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E&quot;</span>, <span class="st">&quot;DP&quot;</span>, <span class="st">&quot;FP&quot;</span>, <span class="st">&quot;SV&quot;</span></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>teams_step <span class="op">=</span> (</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>  teams_bj</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>  .select([<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars)</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>  .drop_nulls()</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>  .to_pandas()</span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure all modeling columns are numeric.</span></span>
+<span id="cb63-16"><a href="#cb63-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> [<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars:</span>
+<span id="cb63-17"><a href="#cb63-17" aria-hidden="true" tabindex="-1"></a>    teams_step[col] <span class="op">=</span> pd.to_numeric(teams_step[col], errors<span class="op">=</span><span class="st">&quot;coerce&quot;</span>)</span>
+<span id="cb63-18"><a href="#cb63-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb63-19"><a href="#cb63-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-20"><a href="#cb63-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-21"><a href="#cb63-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper functions</span></span>
-<span id="cb63-22"><a href="#cb63-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_grouped_binomial_glm(data, terms, intercept<span class="op">=</span><span class="va">True</span>):</span>
-<span id="cb63-23"><a href="#cb63-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb63-24"><a href="#cb63-24" aria-hidden="true" tabindex="-1"></a><span class="co">    Python equivalent of:</span></span>
-<span id="cb63-25"><a href="#cb63-25" aria-hidden="true" tabindex="-1"></a><span class="co">        glm(cbind(W, L) ~ ..., data = data, family = binomial)</span></span>
-<span id="cb63-26"><a href="#cb63-26" aria-hidden="true" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
-<span id="cb63-27"><a href="#cb63-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-28"><a href="#cb63-28" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> data[[<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>]].to_numpy(dtype<span class="op">=</span><span class="bu">float</span>)</span>
-<span id="cb63-29"><a href="#cb63-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-30"><a href="#cb63-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(terms) <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb63-31"><a href="#cb63-31" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> pd.DataFrame(index<span class="op">=</span>data.index)</span>
-<span id="cb63-32"><a href="#cb63-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb63-33"><a href="#cb63-33" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> data[terms].copy()</span>
-<span id="cb63-34"><a href="#cb63-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-35"><a href="#cb63-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> intercept:</span>
-<span id="cb63-36"><a href="#cb63-36" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> sm.add_constant(X, has_constant<span class="op">=</span><span class="st">&quot;add&quot;</span>)</span>
-<span id="cb63-37"><a href="#cb63-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-38"><a href="#cb63-38" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> sm.GLM(</span>
-<span id="cb63-39"><a href="#cb63-39" aria-hidden="true" tabindex="-1"></a>        y,</span>
-<span id="cb63-40"><a href="#cb63-40" aria-hidden="true" tabindex="-1"></a>        X,</span>
-<span id="cb63-41"><a href="#cb63-41" aria-hidden="true" tabindex="-1"></a>        family<span class="op">=</span>sm.families.Binomial()</span>
-<span id="cb63-42"><a href="#cb63-42" aria-hidden="true" tabindex="-1"></a>    ).fit(</span>
-<span id="cb63-43"><a href="#cb63-43" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">&quot;IRLS&quot;</span>,</span>
-<span id="cb63-44"><a href="#cb63-44" aria-hidden="true" tabindex="-1"></a>        maxiter<span class="op">=</span><span class="dv">25</span>,</span>
-<span id="cb63-45"><a href="#cb63-45" aria-hidden="true" tabindex="-1"></a>        tol<span class="op">=</span><span class="fl">1e-8</span></span>
-<span id="cb63-46"><a href="#cb63-46" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb63-47"><a href="#cb63-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-48"><a href="#cb63-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model</span>
+<span id="cb63-20"><a href="#cb63-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper functions</span></span>
+<span id="cb63-21"><a href="#cb63-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_grouped_binomial_glm(data, terms, intercept<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb63-22"><a href="#cb63-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb63-23"><a href="#cb63-23" aria-hidden="true" tabindex="-1"></a><span class="co">    Python equivalent of:</span></span>
+<span id="cb63-24"><a href="#cb63-24" aria-hidden="true" tabindex="-1"></a><span class="co">        glm(cbind(W, L) ~ ..., data = data, family = binomial)</span></span>
+<span id="cb63-25"><a href="#cb63-25" aria-hidden="true" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb63-26"><a href="#cb63-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-27"><a href="#cb63-27" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> data[[<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>]].to_numpy(dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb63-28"><a href="#cb63-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-29"><a href="#cb63-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(terms) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb63-30"><a href="#cb63-30" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> pd.DataFrame(index<span class="op">=</span>data.index)</span>
+<span id="cb63-31"><a href="#cb63-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb63-32"><a href="#cb63-32" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> data[terms].copy()</span>
+<span id="cb63-33"><a href="#cb63-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-34"><a href="#cb63-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> intercept:</span>
+<span id="cb63-35"><a href="#cb63-35" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> sm.add_constant(X, has_constant<span class="op">=</span><span class="st">&quot;add&quot;</span>)</span>
+<span id="cb63-36"><a href="#cb63-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-37"><a href="#cb63-37" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> sm.GLM(</span>
+<span id="cb63-38"><a href="#cb63-38" aria-hidden="true" tabindex="-1"></a>        y,</span>
+<span id="cb63-39"><a href="#cb63-39" aria-hidden="true" tabindex="-1"></a>        X,</span>
+<span id="cb63-40"><a href="#cb63-40" aria-hidden="true" tabindex="-1"></a>        family<span class="op">=</span>sm.families.Binomial()</span>
+<span id="cb63-41"><a href="#cb63-41" aria-hidden="true" tabindex="-1"></a>    ).fit(</span>
+<span id="cb63-42"><a href="#cb63-42" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">&quot;IRLS&quot;</span>,</span>
+<span id="cb63-43"><a href="#cb63-43" aria-hidden="true" tabindex="-1"></a>        maxiter<span class="op">=</span><span class="dv">25</span>,</span>
+<span id="cb63-44"><a href="#cb63-44" aria-hidden="true" tabindex="-1"></a>        tol<span class="op">=</span><span class="fl">1e-8</span></span>
+<span id="cb63-45"><a href="#cb63-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb63-46"><a href="#cb63-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-47"><a href="#cb63-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model</span>
+<span id="cb63-48"><a href="#cb63-48" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb63-49"><a href="#cb63-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-50"><a href="#cb63-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-51"><a href="#cb63-51" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> formula_string(terms, intercept<span class="op">=</span><span class="va">True</span>):</span>
-<span id="cb63-52"><a href="#cb63-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(terms) <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb63-53"><a href="#cb63-53" aria-hidden="true" tabindex="-1"></a>        rhs <span class="op">=</span> <span class="st">&quot;1&quot;</span> <span class="cf">if</span> intercept <span class="cf">else</span> <span class="st">&quot;0&quot;</span></span>
-<span id="cb63-54"><a href="#cb63-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb63-55"><a href="#cb63-55" aria-hidden="true" tabindex="-1"></a>        rhs <span class="op">=</span> <span class="st">&quot; + &quot;</span>.join(terms)</span>
-<span id="cb63-56"><a href="#cb63-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> intercept:</span>
-<span id="cb63-57"><a href="#cb63-57" aria-hidden="true" tabindex="-1"></a>            rhs <span class="op">=</span> <span class="st">&quot;0 + &quot;</span> <span class="op">+</span> rhs</span>
-<span id="cb63-58"><a href="#cb63-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-59"><a href="#cb63-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;cbind(W, L) ~ &quot;</span> <span class="op">+</span> rhs</span>
+<span id="cb63-50"><a href="#cb63-50" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> formula_string(terms, intercept<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb63-51"><a href="#cb63-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(terms) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb63-52"><a href="#cb63-52" aria-hidden="true" tabindex="-1"></a>        rhs <span class="op">=</span> <span class="st">&quot;1&quot;</span> <span class="cf">if</span> intercept <span class="cf">else</span> <span class="st">&quot;0&quot;</span></span>
+<span id="cb63-53"><a href="#cb63-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb63-54"><a href="#cb63-54" aria-hidden="true" tabindex="-1"></a>        rhs <span class="op">=</span> <span class="st">&quot; + &quot;</span>.join(terms)</span>
+<span id="cb63-55"><a href="#cb63-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> intercept:</span>
+<span id="cb63-56"><a href="#cb63-56" aria-hidden="true" tabindex="-1"></a>            rhs <span class="op">=</span> <span class="st">&quot;0 + &quot;</span> <span class="op">+</span> rhs</span>
+<span id="cb63-57"><a href="#cb63-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-58"><a href="#cb63-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;cbind(W, L) ~ &quot;</span> <span class="op">+</span> rhs</span>
+<span id="cb63-59"><a href="#cb63-59" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb63-60"><a href="#cb63-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-61"><a href="#cb63-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-62"><a href="#cb63-62" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stepwise_aic(data, candidate_terms, start_terms<span class="op">=</span><span class="va">None</span>, intercept<span class="op">=</span><span class="va">True</span>, trace<span class="op">=</span><span class="va">False</span>):</span>
-<span id="cb63-63"><a href="#cb63-63" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb63-64"><a href="#cb63-64" aria-hidden="true" tabindex="-1"></a><span class="co">    Python analogue of:</span></span>
-<span id="cb63-65"><a href="#cb63-65" aria-hidden="true" tabindex="-1"></a><span class="co">        MASS::stepAIC(full_glm, direction = &quot;both&quot;, trace = FALSE)</span></span>
-<span id="cb63-66"><a href="#cb63-66" aria-hidden="true" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
-<span id="cb63-67"><a href="#cb63-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-68"><a href="#cb63-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> start_terms <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb63-69"><a href="#cb63-69" aria-hidden="true" tabindex="-1"></a>        current_terms <span class="op">=</span> candidate_terms.copy()</span>
-<span id="cb63-70"><a href="#cb63-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb63-71"><a href="#cb63-71" aria-hidden="true" tabindex="-1"></a>        current_terms <span class="op">=</span> start_terms.copy()</span>
-<span id="cb63-72"><a href="#cb63-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-73"><a href="#cb63-73" aria-hidden="true" tabindex="-1"></a>    current_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
-<span id="cb63-74"><a href="#cb63-74" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>data,</span>
-<span id="cb63-75"><a href="#cb63-75" aria-hidden="true" tabindex="-1"></a>        terms<span class="op">=</span>current_terms,</span>
-<span id="cb63-76"><a href="#cb63-76" aria-hidden="true" tabindex="-1"></a>        intercept<span class="op">=</span>intercept</span>
-<span id="cb63-77"><a href="#cb63-77" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb63-78"><a href="#cb63-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-79"><a href="#cb63-79" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> [{</span>
-<span id="cb63-80"><a href="#cb63-80" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Action&quot;</span>: <span class="st">&quot;Start&quot;</span>,</span>
-<span id="cb63-81"><a href="#cb63-81" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Term&quot;</span>: <span class="st">&quot;&lt;none&gt;&quot;</span>,</span>
-<span id="cb63-82"><a href="#cb63-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Df_Model&quot;</span>: current_model.df_model,</span>
-<span id="cb63-83"><a href="#cb63-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Resid_Df&quot;</span>: current_model.df_resid,</span>
-<span id="cb63-84"><a href="#cb63-84" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Deviance&quot;</span>: current_model.deviance,</span>
-<span id="cb63-85"><a href="#cb63-85" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;AIC&quot;</span>: current_model.aic</span>
-<span id="cb63-86"><a href="#cb63-86" aria-hidden="true" tabindex="-1"></a>    }]</span>
-<span id="cb63-87"><a href="#cb63-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-88"><a href="#cb63-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
-<span id="cb63-89"><a href="#cb63-89" aria-hidden="true" tabindex="-1"></a>        current_aic <span class="op">=</span> current_model.aic</span>
-<span id="cb63-90"><a href="#cb63-90" aria-hidden="true" tabindex="-1"></a>        possible_moves <span class="op">=</span> []</span>
-<span id="cb63-91"><a href="#cb63-91" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-92"><a href="#cb63-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Try dropping each current term</span></span>
-<span id="cb63-93"><a href="#cb63-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> term <span class="kw">in</span> current_terms:</span>
-<span id="cb63-94"><a href="#cb63-94" aria-hidden="true" tabindex="-1"></a>            trial_terms <span class="op">=</span> [t <span class="cf">for</span> t <span class="kw">in</span> current_terms <span class="cf">if</span> t <span class="op">!=</span> term]</span>
-<span id="cb63-95"><a href="#cb63-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-96"><a href="#cb63-96" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
-<span id="cb63-97"><a href="#cb63-97" aria-hidden="true" tabindex="-1"></a>                trial_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
-<span id="cb63-98"><a href="#cb63-98" aria-hidden="true" tabindex="-1"></a>                    data<span class="op">=</span>data,</span>
-<span id="cb63-99"><a href="#cb63-99" aria-hidden="true" tabindex="-1"></a>                    terms<span class="op">=</span>trial_terms,</span>
-<span id="cb63-100"><a href="#cb63-100" aria-hidden="true" tabindex="-1"></a>                    intercept<span class="op">=</span>intercept</span>
-<span id="cb63-101"><a href="#cb63-101" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb63-102"><a href="#cb63-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-103"><a href="#cb63-103" aria-hidden="true" tabindex="-1"></a>                possible_moves.append({</span>
-<span id="cb63-104"><a href="#cb63-104" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Action&quot;</span>: <span class="st">&quot;Drop&quot;</span>,</span>
-<span id="cb63-105"><a href="#cb63-105" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Term&quot;</span>: term,</span>
-<span id="cb63-106"><a href="#cb63-106" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Terms&quot;</span>: trial_terms,</span>
-<span id="cb63-107"><a href="#cb63-107" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Model&quot;</span>: trial_model,</span>
-<span id="cb63-108"><a href="#cb63-108" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;AIC&quot;</span>: trial_model.aic</span>
-<span id="cb63-109"><a href="#cb63-109" aria-hidden="true" tabindex="-1"></a>                })</span>
-<span id="cb63-110"><a href="#cb63-110" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb63-111"><a href="#cb63-111" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> trace:</span>
-<span id="cb63-112"><a href="#cb63-112" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f&quot;Drop </span><span class="sc">{</span>term<span class="sc">}</span><span class="ss"> failed: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb63-113"><a href="#cb63-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-114"><a href="#cb63-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Try adding each absent term</span></span>
-<span id="cb63-115"><a href="#cb63-115" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> term <span class="kw">in</span> candidate_terms:</span>
-<span id="cb63-116"><a href="#cb63-116" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> term <span class="kw">not</span> <span class="kw">in</span> current_terms:</span>
-<span id="cb63-117"><a href="#cb63-117" aria-hidden="true" tabindex="-1"></a>                trial_terms <span class="op">=</span> current_terms <span class="op">+</span> [term]</span>
-<span id="cb63-118"><a href="#cb63-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-119"><a href="#cb63-119" aria-hidden="true" tabindex="-1"></a>                <span class="cf">try</span>:</span>
-<span id="cb63-120"><a href="#cb63-120" aria-hidden="true" tabindex="-1"></a>                    trial_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
-<span id="cb63-121"><a href="#cb63-121" aria-hidden="true" tabindex="-1"></a>                        data<span class="op">=</span>data,</span>
-<span id="cb63-122"><a href="#cb63-122" aria-hidden="true" tabindex="-1"></a>                        terms<span class="op">=</span>trial_terms,</span>
-<span id="cb63-123"><a href="#cb63-123" aria-hidden="true" tabindex="-1"></a>                        intercept<span class="op">=</span>intercept</span>
-<span id="cb63-124"><a href="#cb63-124" aria-hidden="true" tabindex="-1"></a>                    )</span>
-<span id="cb63-125"><a href="#cb63-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-126"><a href="#cb63-126" aria-hidden="true" tabindex="-1"></a>                    possible_moves.append({</span>
-<span id="cb63-127"><a href="#cb63-127" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Action&quot;</span>: <span class="st">&quot;Add&quot;</span>,</span>
-<span id="cb63-128"><a href="#cb63-128" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Term&quot;</span>: term,</span>
-<span id="cb63-129"><a href="#cb63-129" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Terms&quot;</span>: trial_terms,</span>
-<span id="cb63-130"><a href="#cb63-130" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Model&quot;</span>: trial_model,</span>
-<span id="cb63-131"><a href="#cb63-131" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;AIC&quot;</span>: trial_model.aic</span>
-<span id="cb63-132"><a href="#cb63-132" aria-hidden="true" tabindex="-1"></a>                    })</span>
-<span id="cb63-133"><a href="#cb63-133" aria-hidden="true" tabindex="-1"></a>                <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb63-134"><a href="#cb63-134" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> trace:</span>
-<span id="cb63-135"><a href="#cb63-135" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">print</span>(<span class="ss">f&quot;Add </span><span class="sc">{</span>term<span class="sc">}</span><span class="ss"> failed: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb63-136"><a href="#cb63-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-137"><a href="#cb63-137" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(possible_moves) <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb63-138"><a href="#cb63-138" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
-<span id="cb63-139"><a href="#cb63-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-140"><a href="#cb63-140" aria-hidden="true" tabindex="-1"></a>        best_move <span class="op">=</span> <span class="bu">min</span>(possible_moves, key<span class="op">=</span><span class="kw">lambda</span> d: d[<span class="st">&quot;AIC&quot;</span>])</span>
-<span id="cb63-141"><a href="#cb63-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-142"><a href="#cb63-142" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> best_move[<span class="st">&quot;AIC&quot;</span>] <span class="op">&lt;</span> current_aic <span class="op">-</span> <span class="fl">1e-8</span>:</span>
-<span id="cb63-143"><a href="#cb63-143" aria-hidden="true" tabindex="-1"></a>            current_terms <span class="op">=</span> best_move[<span class="st">&quot;Terms&quot;</span>]</span>
-<span id="cb63-144"><a href="#cb63-144" aria-hidden="true" tabindex="-1"></a>            current_model <span class="op">=</span> best_move[<span class="st">&quot;Model&quot;</span>]</span>
-<span id="cb63-145"><a href="#cb63-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-146"><a href="#cb63-146" aria-hidden="true" tabindex="-1"></a>            path.append({</span>
-<span id="cb63-147"><a href="#cb63-147" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Action&quot;</span>: best_move[<span class="st">&quot;Action&quot;</span>],</span>
-<span id="cb63-148"><a href="#cb63-148" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Term&quot;</span>: best_move[<span class="st">&quot;Term&quot;</span>],</span>
-<span id="cb63-149"><a href="#cb63-149" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Df_Model&quot;</span>: current_model.df_model,</span>
-<span id="cb63-150"><a href="#cb63-150" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Resid_Df&quot;</span>: current_model.df_resid,</span>
-<span id="cb63-151"><a href="#cb63-151" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Deviance&quot;</span>: current_model.deviance,</span>
-<span id="cb63-152"><a href="#cb63-152" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;AIC&quot;</span>: current_model.aic</span>
-<span id="cb63-153"><a href="#cb63-153" aria-hidden="true" tabindex="-1"></a>            })</span>
-<span id="cb63-154"><a href="#cb63-154" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-155"><a href="#cb63-155" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> trace:</span>
-<span id="cb63-156"><a href="#cb63-156" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(</span>
-<span id="cb63-157"><a href="#cb63-157" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f&quot;</span><span class="sc">{</span>best_move[<span class="st">&#39;Action&#39;</span>]<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>best_move[<span class="st">&#39;Term&#39;</span>]<span class="sc">}</span><span class="ss">: &quot;</span></span>
-<span id="cb63-158"><a href="#cb63-158" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f&quot;AIC = </span><span class="sc">{</span>current_model<span class="sc">.</span>aic<span class="sc">:.4f}</span><span class="ss">&quot;</span></span>
-<span id="cb63-159"><a href="#cb63-159" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb63-160"><a href="#cb63-160" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb63-161"><a href="#cb63-161" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
-<span id="cb63-162"><a href="#cb63-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-163"><a href="#cb63-163" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> current_model, current_terms, pd.DataFrame(path)</span>
+<span id="cb63-61"><a href="#cb63-61" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> stepwise_aic(data, candidate_terms, start_terms<span class="op">=</span><span class="va">None</span>, intercept<span class="op">=</span><span class="va">True</span>, trace<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb63-62"><a href="#cb63-62" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb63-63"><a href="#cb63-63" aria-hidden="true" tabindex="-1"></a><span class="co">    Python analogue of:</span></span>
+<span id="cb63-64"><a href="#cb63-64" aria-hidden="true" tabindex="-1"></a><span class="co">        MASS::stepAIC(full_glm, direction = &quot;both&quot;, trace = FALSE)</span></span>
+<span id="cb63-65"><a href="#cb63-65" aria-hidden="true" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb63-66"><a href="#cb63-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-67"><a href="#cb63-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> start_terms <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb63-68"><a href="#cb63-68" aria-hidden="true" tabindex="-1"></a>        current_terms <span class="op">=</span> candidate_terms.copy()</span>
+<span id="cb63-69"><a href="#cb63-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb63-70"><a href="#cb63-70" aria-hidden="true" tabindex="-1"></a>        current_terms <span class="op">=</span> start_terms.copy()</span>
+<span id="cb63-71"><a href="#cb63-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-72"><a href="#cb63-72" aria-hidden="true" tabindex="-1"></a>    current_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
+<span id="cb63-73"><a href="#cb63-73" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>data,</span>
+<span id="cb63-74"><a href="#cb63-74" aria-hidden="true" tabindex="-1"></a>        terms<span class="op">=</span>current_terms,</span>
+<span id="cb63-75"><a href="#cb63-75" aria-hidden="true" tabindex="-1"></a>        intercept<span class="op">=</span>intercept</span>
+<span id="cb63-76"><a href="#cb63-76" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb63-77"><a href="#cb63-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-78"><a href="#cb63-78" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> [{</span>
+<span id="cb63-79"><a href="#cb63-79" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Action&quot;</span>: <span class="st">&quot;Start&quot;</span>,</span>
+<span id="cb63-80"><a href="#cb63-80" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Term&quot;</span>: <span class="st">&quot;&lt;none&gt;&quot;</span>,</span>
+<span id="cb63-81"><a href="#cb63-81" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Df_Model&quot;</span>: current_model.df_model,</span>
+<span id="cb63-82"><a href="#cb63-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Resid_Df&quot;</span>: current_model.df_resid,</span>
+<span id="cb63-83"><a href="#cb63-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Deviance&quot;</span>: current_model.deviance,</span>
+<span id="cb63-84"><a href="#cb63-84" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;AIC&quot;</span>: current_model.aic</span>
+<span id="cb63-85"><a href="#cb63-85" aria-hidden="true" tabindex="-1"></a>    }]</span>
+<span id="cb63-86"><a href="#cb63-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-87"><a href="#cb63-87" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb63-88"><a href="#cb63-88" aria-hidden="true" tabindex="-1"></a>        current_aic <span class="op">=</span> current_model.aic</span>
+<span id="cb63-89"><a href="#cb63-89" aria-hidden="true" tabindex="-1"></a>        possible_moves <span class="op">=</span> []</span>
+<span id="cb63-90"><a href="#cb63-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-91"><a href="#cb63-91" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Try dropping each current term</span></span>
+<span id="cb63-92"><a href="#cb63-92" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> term <span class="kw">in</span> current_terms:</span>
+<span id="cb63-93"><a href="#cb63-93" aria-hidden="true" tabindex="-1"></a>            trial_terms <span class="op">=</span> [t <span class="cf">for</span> t <span class="kw">in</span> current_terms <span class="cf">if</span> t <span class="op">!=</span> term]</span>
+<span id="cb63-94"><a href="#cb63-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-95"><a href="#cb63-95" aria-hidden="true" tabindex="-1"></a>            <span class="cf">try</span>:</span>
+<span id="cb63-96"><a href="#cb63-96" aria-hidden="true" tabindex="-1"></a>                trial_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
+<span id="cb63-97"><a href="#cb63-97" aria-hidden="true" tabindex="-1"></a>                    data<span class="op">=</span>data,</span>
+<span id="cb63-98"><a href="#cb63-98" aria-hidden="true" tabindex="-1"></a>                    terms<span class="op">=</span>trial_terms,</span>
+<span id="cb63-99"><a href="#cb63-99" aria-hidden="true" tabindex="-1"></a>                    intercept<span class="op">=</span>intercept</span>
+<span id="cb63-100"><a href="#cb63-100" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb63-101"><a href="#cb63-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-102"><a href="#cb63-102" aria-hidden="true" tabindex="-1"></a>                possible_moves.append({</span>
+<span id="cb63-103"><a href="#cb63-103" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Action&quot;</span>: <span class="st">&quot;Drop&quot;</span>,</span>
+<span id="cb63-104"><a href="#cb63-104" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Term&quot;</span>: term,</span>
+<span id="cb63-105"><a href="#cb63-105" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Terms&quot;</span>: trial_terms,</span>
+<span id="cb63-106"><a href="#cb63-106" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;Model&quot;</span>: trial_model,</span>
+<span id="cb63-107"><a href="#cb63-107" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;AIC&quot;</span>: trial_model.aic</span>
+<span id="cb63-108"><a href="#cb63-108" aria-hidden="true" tabindex="-1"></a>                })</span>
+<span id="cb63-109"><a href="#cb63-109" aria-hidden="true" tabindex="-1"></a>            <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb63-110"><a href="#cb63-110" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> trace:</span>
+<span id="cb63-111"><a href="#cb63-111" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">print</span>(<span class="ss">f&quot;Drop </span><span class="sc">{</span>term<span class="sc">}</span><span class="ss"> failed: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb63-112"><a href="#cb63-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-113"><a href="#cb63-113" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Try adding each absent term</span></span>
+<span id="cb63-114"><a href="#cb63-114" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> term <span class="kw">in</span> candidate_terms:</span>
+<span id="cb63-115"><a href="#cb63-115" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> term <span class="kw">not</span> <span class="kw">in</span> current_terms:</span>
+<span id="cb63-116"><a href="#cb63-116" aria-hidden="true" tabindex="-1"></a>                trial_terms <span class="op">=</span> current_terms <span class="op">+</span> [term]</span>
+<span id="cb63-117"><a href="#cb63-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-118"><a href="#cb63-118" aria-hidden="true" tabindex="-1"></a>                <span class="cf">try</span>:</span>
+<span id="cb63-119"><a href="#cb63-119" aria-hidden="true" tabindex="-1"></a>                    trial_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
+<span id="cb63-120"><a href="#cb63-120" aria-hidden="true" tabindex="-1"></a>                        data<span class="op">=</span>data,</span>
+<span id="cb63-121"><a href="#cb63-121" aria-hidden="true" tabindex="-1"></a>                        terms<span class="op">=</span>trial_terms,</span>
+<span id="cb63-122"><a href="#cb63-122" aria-hidden="true" tabindex="-1"></a>                        intercept<span class="op">=</span>intercept</span>
+<span id="cb63-123"><a href="#cb63-123" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb63-124"><a href="#cb63-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-125"><a href="#cb63-125" aria-hidden="true" tabindex="-1"></a>                    possible_moves.append({</span>
+<span id="cb63-126"><a href="#cb63-126" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Action&quot;</span>: <span class="st">&quot;Add&quot;</span>,</span>
+<span id="cb63-127"><a href="#cb63-127" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Term&quot;</span>: term,</span>
+<span id="cb63-128"><a href="#cb63-128" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Terms&quot;</span>: trial_terms,</span>
+<span id="cb63-129"><a href="#cb63-129" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Model&quot;</span>: trial_model,</span>
+<span id="cb63-130"><a href="#cb63-130" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;AIC&quot;</span>: trial_model.aic</span>
+<span id="cb63-131"><a href="#cb63-131" aria-hidden="true" tabindex="-1"></a>                    })</span>
+<span id="cb63-132"><a href="#cb63-132" aria-hidden="true" tabindex="-1"></a>                <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb63-133"><a href="#cb63-133" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> trace:</span>
+<span id="cb63-134"><a href="#cb63-134" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">print</span>(<span class="ss">f&quot;Add </span><span class="sc">{</span>term<span class="sc">}</span><span class="ss"> failed: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb63-135"><a href="#cb63-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-136"><a href="#cb63-136" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(possible_moves) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb63-137"><a href="#cb63-137" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb63-138"><a href="#cb63-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-139"><a href="#cb63-139" aria-hidden="true" tabindex="-1"></a>        best_move <span class="op">=</span> <span class="bu">min</span>(possible_moves, key<span class="op">=</span><span class="kw">lambda</span> d: d[<span class="st">&quot;AIC&quot;</span>])</span>
+<span id="cb63-140"><a href="#cb63-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-141"><a href="#cb63-141" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> best_move[<span class="st">&quot;AIC&quot;</span>] <span class="op">&lt;</span> current_aic <span class="op">-</span> <span class="fl">1e-8</span>:</span>
+<span id="cb63-142"><a href="#cb63-142" aria-hidden="true" tabindex="-1"></a>            current_terms <span class="op">=</span> best_move[<span class="st">&quot;Terms&quot;</span>]</span>
+<span id="cb63-143"><a href="#cb63-143" aria-hidden="true" tabindex="-1"></a>            current_model <span class="op">=</span> best_move[<span class="st">&quot;Model&quot;</span>]</span>
+<span id="cb63-144"><a href="#cb63-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-145"><a href="#cb63-145" aria-hidden="true" tabindex="-1"></a>            path.append({</span>
+<span id="cb63-146"><a href="#cb63-146" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Action&quot;</span>: best_move[<span class="st">&quot;Action&quot;</span>],</span>
+<span id="cb63-147"><a href="#cb63-147" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Term&quot;</span>: best_move[<span class="st">&quot;Term&quot;</span>],</span>
+<span id="cb63-148"><a href="#cb63-148" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Df_Model&quot;</span>: current_model.df_model,</span>
+<span id="cb63-149"><a href="#cb63-149" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Resid_Df&quot;</span>: current_model.df_resid,</span>
+<span id="cb63-150"><a href="#cb63-150" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;Deviance&quot;</span>: current_model.deviance,</span>
+<span id="cb63-151"><a href="#cb63-151" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;AIC&quot;</span>: current_model.aic</span>
+<span id="cb63-152"><a href="#cb63-152" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="cb63-153"><a href="#cb63-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-154"><a href="#cb63-154" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> trace:</span>
+<span id="cb63-155"><a href="#cb63-155" aria-hidden="true" tabindex="-1"></a>                <span class="bu">print</span>(</span>
+<span id="cb63-156"><a href="#cb63-156" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f&quot;</span><span class="sc">{</span>best_move[<span class="st">&#39;Action&#39;</span>]<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>best_move[<span class="st">&#39;Term&#39;</span>]<span class="sc">}</span><span class="ss">: &quot;</span></span>
+<span id="cb63-157"><a href="#cb63-157" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f&quot;AIC = </span><span class="sc">{</span>current_model<span class="sc">.</span>aic<span class="sc">:.4f}</span><span class="ss">&quot;</span></span>
+<span id="cb63-158"><a href="#cb63-158" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb63-159"><a href="#cb63-159" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb63-160"><a href="#cb63-160" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb63-161"><a href="#cb63-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-162"><a href="#cb63-162" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> current_model, current_terms, pd.DataFrame(path)</span>
+<span id="cb63-163"><a href="#cb63-163" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb63-164"><a href="#cb63-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-165"><a href="#cb63-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-166"><a href="#cb63-166" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dropterm(data, model, terms, intercept<span class="op">=</span><span class="va">True</span>):</span>
-<span id="cb63-167"><a href="#cb63-167" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb63-168"><a href="#cb63-168" aria-hidden="true" tabindex="-1"></a><span class="co">    Python analogue of:</span></span>
-<span id="cb63-169"><a href="#cb63-169" aria-hidden="true" tabindex="-1"></a><span class="co">        MASS::dropterm(model, test = &quot;Chisq&quot;)</span></span>
-<span id="cb63-170"><a href="#cb63-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-171"><a href="#cb63-171" aria-hidden="true" tabindex="-1"></a><span class="co">    For each term, fit the reduced model obtained by dropping that term.</span></span>
-<span id="cb63-172"><a href="#cb63-172" aria-hidden="true" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
-<span id="cb63-173"><a href="#cb63-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-174"><a href="#cb63-174" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> [{</span>
-<span id="cb63-175"><a href="#cb63-175" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;term&quot;</span>: <span class="st">&quot;&lt;none&gt;&quot;</span>,</span>
-<span id="cb63-176"><a href="#cb63-176" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Df&quot;</span>: np.nan,</span>
-<span id="cb63-177"><a href="#cb63-177" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Deviance&quot;</span>: model.deviance,</span>
-<span id="cb63-178"><a href="#cb63-178" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;AIC&quot;</span>: model.aic,</span>
-<span id="cb63-179"><a href="#cb63-179" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;LRT&quot;</span>: np.nan,</span>
-<span id="cb63-180"><a href="#cb63-180" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Pr(&gt;Chi)&quot;</span>: np.nan</span>
-<span id="cb63-181"><a href="#cb63-181" aria-hidden="true" tabindex="-1"></a>    }]</span>
-<span id="cb63-182"><a href="#cb63-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-183"><a href="#cb63-183" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> term <span class="kw">in</span> terms:</span>
-<span id="cb63-184"><a href="#cb63-184" aria-hidden="true" tabindex="-1"></a>        reduced_terms <span class="op">=</span> [t <span class="cf">for</span> t <span class="kw">in</span> terms <span class="cf">if</span> t <span class="op">!=</span> term]</span>
-<span id="cb63-185"><a href="#cb63-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-186"><a href="#cb63-186" aria-hidden="true" tabindex="-1"></a>        reduced_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
-<span id="cb63-187"><a href="#cb63-187" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>data,</span>
-<span id="cb63-188"><a href="#cb63-188" aria-hidden="true" tabindex="-1"></a>            terms<span class="op">=</span>reduced_terms,</span>
-<span id="cb63-189"><a href="#cb63-189" aria-hidden="true" tabindex="-1"></a>            intercept<span class="op">=</span>intercept</span>
-<span id="cb63-190"><a href="#cb63-190" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb63-191"><a href="#cb63-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-192"><a href="#cb63-192" aria-hidden="true" tabindex="-1"></a>        df_diff <span class="op">=</span> reduced_model.df_resid <span class="op">-</span> model.df_resid</span>
-<span id="cb63-193"><a href="#cb63-193" aria-hidden="true" tabindex="-1"></a>        lrt_stat <span class="op">=</span> reduced_model.deviance <span class="op">-</span> model.deviance</span>
-<span id="cb63-194"><a href="#cb63-194" aria-hidden="true" tabindex="-1"></a>        p_value <span class="op">=</span> chi2.sf(lrt_stat, df<span class="op">=</span>df_diff)</span>
-<span id="cb63-195"><a href="#cb63-195" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-196"><a href="#cb63-196" aria-hidden="true" tabindex="-1"></a>        rows.append({</span>
-<span id="cb63-197"><a href="#cb63-197" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;term&quot;</span>: term,</span>
-<span id="cb63-198"><a href="#cb63-198" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Df&quot;</span>: df_diff,</span>
-<span id="cb63-199"><a href="#cb63-199" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Deviance&quot;</span>: reduced_model.deviance,</span>
-<span id="cb63-200"><a href="#cb63-200" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;AIC&quot;</span>: reduced_model.aic,</span>
-<span id="cb63-201"><a href="#cb63-201" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;LRT&quot;</span>: lrt_stat,</span>
-<span id="cb63-202"><a href="#cb63-202" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Pr(&gt;Chi)&quot;</span>: p_value</span>
-<span id="cb63-203"><a href="#cb63-203" aria-hidden="true" tabindex="-1"></a>        })</span>
-<span id="cb63-204"><a href="#cb63-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-205"><a href="#cb63-205" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(rows)</span>
-<span id="cb63-206"><a href="#cb63-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-207"><a href="#cb63-207" aria-hidden="true" tabindex="-1"></a><span class="co"># helper functions 부분 끝. </span></span>
-<span id="cb63-208"><a href="#cb63-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-209"><a href="#cb63-209" aria-hidden="true" tabindex="-1"></a><span class="co"># full logistic regression model with intercept</span></span>
-<span id="cb63-210"><a href="#cb63-210" aria-hidden="true" tabindex="-1"></a>full_glm <span class="op">=</span> fit_grouped_binomial_glm(</span>
-<span id="cb63-211"><a href="#cb63-211" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>teams_step,</span>
-<span id="cb63-212"><a href="#cb63-212" aria-hidden="true" tabindex="-1"></a>    terms<span class="op">=</span>candidate_vars,</span>
-<span id="cb63-213"><a href="#cb63-213" aria-hidden="true" tabindex="-1"></a>    intercept<span class="op">=</span><span class="va">True</span></span>
-<span id="cb63-214"><a href="#cb63-214" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb63-215"><a href="#cb63-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb63-216"><a href="#cb63-216" aria-hidden="true" tabindex="-1"></a><span class="co"># Stepwise AIC selection</span></span>
-<span id="cb63-217"><a href="#cb63-217" aria-hidden="true" tabindex="-1"></a>step_glm, step_terms, step_glm_anova <span class="op">=</span> stepwise_aic(</span>
-<span id="cb63-218"><a href="#cb63-218" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>teams_step,</span>
-<span id="cb63-219"><a href="#cb63-219" aria-hidden="true" tabindex="-1"></a>    candidate_terms<span class="op">=</span>candidate_vars,</span>
-<span id="cb63-220"><a href="#cb63-220" aria-hidden="true" tabindex="-1"></a>    start_terms<span class="op">=</span>candidate_vars,</span>
-<span id="cb63-221"><a href="#cb63-221" aria-hidden="true" tabindex="-1"></a>    intercept<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb63-222"><a href="#cb63-222" aria-hidden="true" tabindex="-1"></a>    trace<span class="op">=</span><span class="va">False</span></span>
-<span id="cb63-223"><a href="#cb63-223" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb63-224"><a href="#cb63-224" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(step_glm_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb63-165"><a href="#cb63-165" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dropterm(data, model, terms, intercept<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb63-166"><a href="#cb63-166" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb63-167"><a href="#cb63-167" aria-hidden="true" tabindex="-1"></a><span class="co">    Python analogue of:</span></span>
+<span id="cb63-168"><a href="#cb63-168" aria-hidden="true" tabindex="-1"></a><span class="co">        MASS::dropterm(model, test = &quot;Chisq&quot;)</span></span>
+<span id="cb63-169"><a href="#cb63-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-170"><a href="#cb63-170" aria-hidden="true" tabindex="-1"></a><span class="co">    For each term, fit the reduced model obtained by dropping that term.</span></span>
+<span id="cb63-171"><a href="#cb63-171" aria-hidden="true" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb63-172"><a href="#cb63-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-173"><a href="#cb63-173" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> [{</span>
+<span id="cb63-174"><a href="#cb63-174" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;term&quot;</span>: <span class="st">&quot;&lt;none&gt;&quot;</span>,</span>
+<span id="cb63-175"><a href="#cb63-175" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Df&quot;</span>: np.nan,</span>
+<span id="cb63-176"><a href="#cb63-176" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Deviance&quot;</span>: model.deviance,</span>
+<span id="cb63-177"><a href="#cb63-177" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;AIC&quot;</span>: model.aic,</span>
+<span id="cb63-178"><a href="#cb63-178" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;LRT&quot;</span>: np.nan,</span>
+<span id="cb63-179"><a href="#cb63-179" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;Pr(&gt;Chi)&quot;</span>: np.nan</span>
+<span id="cb63-180"><a href="#cb63-180" aria-hidden="true" tabindex="-1"></a>    }]</span>
+<span id="cb63-181"><a href="#cb63-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-182"><a href="#cb63-182" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> term <span class="kw">in</span> terms:</span>
+<span id="cb63-183"><a href="#cb63-183" aria-hidden="true" tabindex="-1"></a>        reduced_terms <span class="op">=</span> [t <span class="cf">for</span> t <span class="kw">in</span> terms <span class="cf">if</span> t <span class="op">!=</span> term]</span>
+<span id="cb63-184"><a href="#cb63-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-185"><a href="#cb63-185" aria-hidden="true" tabindex="-1"></a>        reduced_model <span class="op">=</span> fit_grouped_binomial_glm(</span>
+<span id="cb63-186"><a href="#cb63-186" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>data,</span>
+<span id="cb63-187"><a href="#cb63-187" aria-hidden="true" tabindex="-1"></a>            terms<span class="op">=</span>reduced_terms,</span>
+<span id="cb63-188"><a href="#cb63-188" aria-hidden="true" tabindex="-1"></a>            intercept<span class="op">=</span>intercept</span>
+<span id="cb63-189"><a href="#cb63-189" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb63-190"><a href="#cb63-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-191"><a href="#cb63-191" aria-hidden="true" tabindex="-1"></a>        df_diff <span class="op">=</span> reduced_model.df_resid <span class="op">-</span> model.df_resid</span>
+<span id="cb63-192"><a href="#cb63-192" aria-hidden="true" tabindex="-1"></a>        lrt_stat <span class="op">=</span> reduced_model.deviance <span class="op">-</span> model.deviance</span>
+<span id="cb63-193"><a href="#cb63-193" aria-hidden="true" tabindex="-1"></a>        p_value <span class="op">=</span> chi2.sf(lrt_stat, df<span class="op">=</span>df_diff)</span>
+<span id="cb63-194"><a href="#cb63-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-195"><a href="#cb63-195" aria-hidden="true" tabindex="-1"></a>        rows.append({</span>
+<span id="cb63-196"><a href="#cb63-196" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;term&quot;</span>: term,</span>
+<span id="cb63-197"><a href="#cb63-197" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Df&quot;</span>: df_diff,</span>
+<span id="cb63-198"><a href="#cb63-198" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Deviance&quot;</span>: reduced_model.deviance,</span>
+<span id="cb63-199"><a href="#cb63-199" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;AIC&quot;</span>: reduced_model.aic,</span>
+<span id="cb63-200"><a href="#cb63-200" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;LRT&quot;</span>: lrt_stat,</span>
+<span id="cb63-201"><a href="#cb63-201" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Pr(&gt;Chi)&quot;</span>: p_value</span>
+<span id="cb63-202"><a href="#cb63-202" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb63-203"><a href="#cb63-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-204"><a href="#cb63-204" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(rows)</span>
+<span id="cb63-205"><a href="#cb63-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-206"><a href="#cb63-206" aria-hidden="true" tabindex="-1"></a><span class="co"># helper functions 부분 끝. </span></span>
+<span id="cb63-207"><a href="#cb63-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-208"><a href="#cb63-208" aria-hidden="true" tabindex="-1"></a><span class="co"># full logistic regression model with intercept</span></span>
+<span id="cb63-209"><a href="#cb63-209" aria-hidden="true" tabindex="-1"></a>full_glm <span class="op">=</span> fit_grouped_binomial_glm(</span>
+<span id="cb63-210"><a href="#cb63-210" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>teams_step,</span>
+<span id="cb63-211"><a href="#cb63-211" aria-hidden="true" tabindex="-1"></a>    terms<span class="op">=</span>candidate_vars,</span>
+<span id="cb63-212"><a href="#cb63-212" aria-hidden="true" tabindex="-1"></a>    intercept<span class="op">=</span><span class="va">True</span></span>
+<span id="cb63-213"><a href="#cb63-213" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb63-214"><a href="#cb63-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-215"><a href="#cb63-215" aria-hidden="true" tabindex="-1"></a><span class="co"># Stepwise AIC selection</span></span>
+<span id="cb63-216"><a href="#cb63-216" aria-hidden="true" tabindex="-1"></a>step_glm, step_terms, step_glm_anova <span class="op">=</span> stepwise_aic(</span>
+<span id="cb63-217"><a href="#cb63-217" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>teams_step,</span>
+<span id="cb63-218"><a href="#cb63-218" aria-hidden="true" tabindex="-1"></a>    candidate_terms<span class="op">=</span>candidate_vars,</span>
+<span id="cb63-219"><a href="#cb63-219" aria-hidden="true" tabindex="-1"></a>    start_terms<span class="op">=</span>candidate_vars,</span>
+<span id="cb63-220"><a href="#cb63-220" aria-hidden="true" tabindex="-1"></a>    intercept<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb63-221"><a href="#cb63-221" aria-hidden="true" tabindex="-1"></a>    trace<span class="op">=</span><span class="va">False</span></span>
+<span id="cb63-222"><a href="#cb63-222" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb63-223"><a href="#cb63-223" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(step_glm_anova)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Action    Term  Df_Model  Resid_Df    Deviance          AIC
 0   Start  &lt;none&gt;        23       426   95.955513  2627.200071
 1    Drop     ERA        22       427   95.956402  2625.200960
-2    Drop      2B        21       428   95.959971  2623.204529
+2    Drop     X2B        21       428   95.959971  2623.204529
 3    Drop      FP        20       429   95.964360  2621.208917
 4    Drop     HBP        19       430   96.006012  2619.250570
 5    Drop       E        18       431   96.050133  2617.294691
 6    Drop     SOA        17       432   96.286931  2615.531488
 7    Drop      HR        16       433   96.516016  2613.760573
-8    Drop      3B        15       434   96.781204  2612.025761
+8    Drop     X3B        15       434   96.781204  2612.025761
 9    Drop      DP        14       435   97.119267  2610.363825
 10   Drop      SF        13       436   97.578505  2608.823062
 11   Drop     BBA        12       437   98.130377  2607.374934
@@ -6929,7 +6923,7 @@ Number of Fisher Scoring iterations: 3</code></pre>
 14   Drop      BB         9       440  100.532154  2603.776711
 15   Drop     HRA         8       441  101.754425  2602.998983
 16   Drop      HA         7       442  103.176836  2602.421394
-17   Drop  IPOuts         6       443  104.383318  2601.627875
+17   Drop  IPouts         6       443  104.383318  2601.627875
 18   Drop      CS         5       444  106.119323  2601.363880</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reconsider selected variables using dropterm()</span></span>
@@ -6986,7 +6980,7 @@ Model Family:                Binomial   Df Model:                            4
 Link Function:                  Logit   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:                -1295.8
 Date:                    화, 09 6 2026   Deviance:                       108.42
-Time:                        02:10:23   Pearson chi2:                     108.
+Time:                        03:19:18   Pearson chi2:                     108.
 No. Iterations:                     4   Pseudo R-squ. (CS):             0.9709
 Covariance Type:            nonrobust                                         
 ==============================================================================
@@ -7165,8 +7159,8 @@ Number of Fisher Scoring iterations: 3</code></pre>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb81"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>candidate_vars <span class="op">=</span> [</span>
 <span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;log_RS&quot;</span>, <span class="st">&quot;log_RA&quot;</span>,</span>
-<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;H&quot;</span>, <span class="st">&quot;2B&quot;</span>, <span class="st">&quot;3B&quot;</span>, <span class="st">&quot;HR&quot;</span>, <span class="st">&quot;BB&quot;</span>, <span class="st">&quot;SO&quot;</span>, <span class="st">&quot;CS&quot;</span>, <span class="st">&quot;HBP&quot;</span>, <span class="st">&quot;SF&quot;</span>,</span>
-<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ERA&quot;</span>, <span class="st">&quot;CG&quot;</span>, <span class="st">&quot;SHO&quot;</span>, <span class="st">&quot;IPOuts&quot;</span>, <span class="st">&quot;HA&quot;</span>, <span class="st">&quot;HRA&quot;</span>, <span class="st">&quot;BBA&quot;</span>, <span class="st">&quot;SOA&quot;</span>,</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;H&quot;</span>, <span class="st">&quot;X2B&quot;</span>, <span class="st">&quot;X3B&quot;</span>, <span class="st">&quot;HR&quot;</span>, <span class="st">&quot;BB&quot;</span>, <span class="st">&quot;SO&quot;</span>, <span class="st">&quot;CS&quot;</span>, <span class="st">&quot;HBP&quot;</span>, <span class="st">&quot;SF&quot;</span>,</span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ERA&quot;</span>, <span class="st">&quot;CG&quot;</span>, <span class="st">&quot;SHO&quot;</span>, <span class="st">&quot;IPouts&quot;</span>, <span class="st">&quot;HA&quot;</span>, <span class="st">&quot;HRA&quot;</span>, <span class="st">&quot;BBA&quot;</span>, <span class="st">&quot;SOA&quot;</span>,</span>
 <span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E&quot;</span>, <span class="st">&quot;DP&quot;</span>, <span class="st">&quot;FP&quot;</span>, <span class="st">&quot;SV&quot;</span></span>
 <span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a></span>
@@ -7384,9 +7378,9 @@ Number of Fisher Scoring iterations: 3</code></pre>
 0   Start  &lt;none&gt;        23       426  55.729788  2903.589413
 1    Drop      FP        22       427  55.732413  2901.592037
 2    Drop     HBP        21       428  55.744772  2899.604396
-3    Drop      2B        20       429  55.814016  2897.673640
+3    Drop     X2B        20       429  55.814016  2897.673640
 4    Drop     SOA        19       430  55.935520  2895.795144
-5    Drop      3B        18       431  56.126093  2893.985717
+5    Drop     X3B        18       431  56.126093  2893.985717
 6    Drop  log_RA        17       432  56.277901  2892.137526
 7    Drop      HR        16       433  56.458800  2890.318424
 8    Drop      SF        15       434  56.734868  2888.594492
@@ -7394,7 +7388,7 @@ Number of Fisher Scoring iterations: 3</code></pre>
 10   Drop      DP        13       436  57.393085  2885.252709
 11   Drop      HA        12       437  58.007562  2883.867186
 12   Drop     HRA        11       438  58.367338  2882.226962
-13   Drop  IPOuts        10       439  58.710114  2880.569738
+13   Drop  IPouts        10       439  58.710114  2880.569738
 14   Drop      CS         9       440  59.120372  2878.979997
 15   Drop      SO         8       441  59.544992  2877.404616
 16   Drop       H         7       442  59.727090  2875.586714
@@ -7470,7 +7464,7 @@ Model Family:                 Poisson   Df Model:                            3
 Link Function:                    Log   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:                -1433.6
 Date:                    화, 09 6 2026   Deviance:                       67.326
-Time:                        02:10:30   Pearson chi2:                     67.0
+Time:                        03:19:23   Pearson chi2:                     67.0
 No. Iterations:                     4   Pseudo R-squ. (CS):             0.8302
 Covariance Type:            nonrobust                                         
 ==============================================================================
@@ -7536,75 +7530,68 @@ SV             0.0054      0.001      5.949      0.000       0.004       0.007
 <div class="sourceCode cell-code" id="cb97"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="co"># statsmodels NegativeBinomial estimates alpha:</span></span>
 <span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a><span class="co">#     Var(W_i) = mu_i + alpha * mu_i^2</span></span>
 <span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>candidate_vars <span class="op">=</span> [</span>
-<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;log_RS&quot;</span>, <span class="st">&quot;log_RA&quot;</span>,</span>
-<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;H&quot;</span>, <span class="st">&quot;2B&quot;</span>, <span class="st">&quot;3B&quot;</span>, <span class="st">&quot;HR&quot;</span>, <span class="st">&quot;BB&quot;</span>, <span class="st">&quot;SO&quot;</span>, <span class="st">&quot;CS&quot;</span>, <span class="st">&quot;HBP&quot;</span>, <span class="st">&quot;SF&quot;</span>,</span>
-<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ERA&quot;</span>, <span class="st">&quot;CG&quot;</span>, <span class="st">&quot;SHO&quot;</span>, <span class="st">&quot;IPOuts&quot;</span>, <span class="st">&quot;HA&quot;</span>, <span class="st">&quot;HRA&quot;</span>, <span class="st">&quot;BBA&quot;</span>, <span class="st">&quot;SOA&quot;</span>,</span>
-<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E&quot;</span>, <span class="st">&quot;DP&quot;</span>, <span class="st">&quot;FP&quot;</span>, <span class="st">&quot;SV&quot;</span></span>
-<span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-11"><a href="#cb97-11" aria-hidden="true" tabindex="-1"></a>teams_nb <span class="op">=</span> (</span>
-<span id="cb97-12"><a href="#cb97-12" aria-hidden="true" tabindex="-1"></a>    teams_bj</span>
-<span id="cb97-13"><a href="#cb97-13" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars)</span>
-<span id="cb97-14"><a href="#cb97-14" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
-<span id="cb97-15"><a href="#cb97-15" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
-<span id="cb97-16"><a href="#cb97-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb97-17"><a href="#cb97-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> [<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars:</span>
-<span id="cb97-18"><a href="#cb97-18" aria-hidden="true" tabindex="-1"></a>    teams_nb[col] <span class="op">=</span> pd.to_numeric(teams_nb[col], errors<span class="op">=</span><span class="st">&quot;coerce&quot;</span>)</span>
-<span id="cb97-19"><a href="#cb97-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-20"><a href="#cb97-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit full negative binomial model and collect warnings/errors</span></span>
-<span id="cb97-21"><a href="#cb97-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_full_negative_binomial_with_report(data, terms, intercept<span class="op">=</span><span class="va">True</span>, maxiter<span class="op">=</span><span class="dv">100</span>):</span>
-<span id="cb97-22"><a href="#cb97-22" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> data[<span class="st">&quot;W&quot;</span>].to_numpy(dtype<span class="op">=</span><span class="bu">float</span>)</span>
-<span id="cb97-23"><a href="#cb97-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-24"><a href="#cb97-24" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> data[terms].copy()</span>
-<span id="cb97-25"><a href="#cb97-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> intercept:</span>
-<span id="cb97-26"><a href="#cb97-26" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> sm.add_constant(X, has_constant<span class="op">=</span><span class="st">&quot;add&quot;</span>)</span>
-<span id="cb97-27"><a href="#cb97-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-28"><a href="#cb97-28" aria-hidden="true" tabindex="-1"></a>    warning_messages <span class="op">=</span> []</span>
-<span id="cb97-29"><a href="#cb97-29" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb97-30"><a href="#cb97-30" aria-hidden="true" tabindex="-1"></a>    error_message <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb97-31"><a href="#cb97-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-32"><a href="#cb97-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb97-33"><a href="#cb97-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> warnings.catch_warnings(record<span class="op">=</span><span class="va">True</span>) <span class="im">as</span> caught_warnings:</span>
-<span id="cb97-34"><a href="#cb97-34" aria-hidden="true" tabindex="-1"></a>            warnings.simplefilter(<span class="st">&quot;always&quot;</span>)</span>
-<span id="cb97-35"><a href="#cb97-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-36"><a href="#cb97-36" aria-hidden="true" tabindex="-1"></a>            nb_model <span class="op">=</span> NegativeBinomial(</span>
-<span id="cb97-37"><a href="#cb97-37" aria-hidden="true" tabindex="-1"></a>                endog<span class="op">=</span>y,</span>
-<span id="cb97-38"><a href="#cb97-38" aria-hidden="true" tabindex="-1"></a>                exog<span class="op">=</span>X,</span>
-<span id="cb97-39"><a href="#cb97-39" aria-hidden="true" tabindex="-1"></a>                loglike_method<span class="op">=</span><span class="st">&quot;nb2&quot;</span></span>
-<span id="cb97-40"><a href="#cb97-40" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb97-41"><a href="#cb97-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-42"><a href="#cb97-42" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> nb_model.fit(</span>
-<span id="cb97-43"><a href="#cb97-43" aria-hidden="true" tabindex="-1"></a>                maxiter<span class="op">=</span>maxiter,</span>
-<span id="cb97-44"><a href="#cb97-44" aria-hidden="true" tabindex="-1"></a>                disp<span class="op">=</span><span class="va">False</span></span>
-<span id="cb97-45"><a href="#cb97-45" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>teams_nb <span class="op">=</span> (</span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>    teams_bj</span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars)</span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> [<span class="st">&quot;W&quot;</span>, <span class="st">&quot;L&quot;</span>, <span class="st">&quot;WPct&quot;</span>] <span class="op">+</span> candidate_vars:</span>
+<span id="cb97-11"><a href="#cb97-11" aria-hidden="true" tabindex="-1"></a>    teams_nb[col] <span class="op">=</span> pd.to_numeric(teams_nb[col], errors<span class="op">=</span><span class="st">&quot;coerce&quot;</span>)</span>
+<span id="cb97-12"><a href="#cb97-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-13"><a href="#cb97-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit full negative binomial model and collect warnings/errors</span></span>
+<span id="cb97-14"><a href="#cb97-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_full_negative_binomial_with_report(data, terms, intercept<span class="op">=</span><span class="va">True</span>, maxiter<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="cb97-15"><a href="#cb97-15" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> data[<span class="st">&quot;W&quot;</span>].to_numpy(dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb97-16"><a href="#cb97-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-17"><a href="#cb97-17" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> data[terms].copy()</span>
+<span id="cb97-18"><a href="#cb97-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> intercept:</span>
+<span id="cb97-19"><a href="#cb97-19" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> sm.add_constant(X, has_constant<span class="op">=</span><span class="st">&quot;add&quot;</span>)</span>
+<span id="cb97-20"><a href="#cb97-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-21"><a href="#cb97-21" aria-hidden="true" tabindex="-1"></a>    warning_messages <span class="op">=</span> []</span>
+<span id="cb97-22"><a href="#cb97-22" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb97-23"><a href="#cb97-23" aria-hidden="true" tabindex="-1"></a>    error_message <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb97-24"><a href="#cb97-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-25"><a href="#cb97-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb97-26"><a href="#cb97-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> warnings.catch_warnings(record<span class="op">=</span><span class="va">True</span>) <span class="im">as</span> caught_warnings:</span>
+<span id="cb97-27"><a href="#cb97-27" aria-hidden="true" tabindex="-1"></a>            warnings.simplefilter(<span class="st">&quot;always&quot;</span>)</span>
+<span id="cb97-28"><a href="#cb97-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-29"><a href="#cb97-29" aria-hidden="true" tabindex="-1"></a>            nb_model <span class="op">=</span> NegativeBinomial(</span>
+<span id="cb97-30"><a href="#cb97-30" aria-hidden="true" tabindex="-1"></a>                endog<span class="op">=</span>y,</span>
+<span id="cb97-31"><a href="#cb97-31" aria-hidden="true" tabindex="-1"></a>                exog<span class="op">=</span>X,</span>
+<span id="cb97-32"><a href="#cb97-32" aria-hidden="true" tabindex="-1"></a>                loglike_method<span class="op">=</span><span class="st">&quot;nb2&quot;</span></span>
+<span id="cb97-33"><a href="#cb97-33" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb97-34"><a href="#cb97-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-35"><a href="#cb97-35" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> nb_model.fit(</span>
+<span id="cb97-36"><a href="#cb97-36" aria-hidden="true" tabindex="-1"></a>                maxiter<span class="op">=</span>maxiter,</span>
+<span id="cb97-37"><a href="#cb97-37" aria-hidden="true" tabindex="-1"></a>                disp<span class="op">=</span><span class="va">False</span></span>
+<span id="cb97-38"><a href="#cb97-38" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb97-39"><a href="#cb97-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-40"><a href="#cb97-40" aria-hidden="true" tabindex="-1"></a>            warning_messages <span class="op">=</span> [</span>
+<span id="cb97-41"><a href="#cb97-41" aria-hidden="true" tabindex="-1"></a>                <span class="bu">str</span>(w.message) <span class="cf">for</span> w <span class="kw">in</span> caught_warnings</span>
+<span id="cb97-42"><a href="#cb97-42" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb97-43"><a href="#cb97-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-44"><a href="#cb97-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb97-45"><a href="#cb97-45" aria-hidden="true" tabindex="-1"></a>        error_message <span class="op">=</span> <span class="bu">str</span>(e)</span>
 <span id="cb97-46"><a href="#cb97-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-47"><a href="#cb97-47" aria-hidden="true" tabindex="-1"></a>            warning_messages <span class="op">=</span> [</span>
-<span id="cb97-48"><a href="#cb97-48" aria-hidden="true" tabindex="-1"></a>                <span class="bu">str</span>(w.message) <span class="cf">for</span> w <span class="kw">in</span> caught_warnings</span>
-<span id="cb97-49"><a href="#cb97-49" aria-hidden="true" tabindex="-1"></a>            ]</span>
-<span id="cb97-50"><a href="#cb97-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-51"><a href="#cb97-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb97-52"><a href="#cb97-52" aria-hidden="true" tabindex="-1"></a>        error_message <span class="op">=</span> <span class="bu">str</span>(e)</span>
-<span id="cb97-53"><a href="#cb97-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-54"><a href="#cb97-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result, warning_messages, error_message</span>
-<span id="cb97-55"><a href="#cb97-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-47"><a href="#cb97-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result, warning_messages, error_message</span>
+<span id="cb97-48"><a href="#cb97-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-49"><a href="#cb97-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-50"><a href="#cb97-50" aria-hidden="true" tabindex="-1"></a>nb_full, nb_warnings, nb_error <span class="op">=</span> fit_full_negative_binomial_with_report(</span>
+<span id="cb97-51"><a href="#cb97-51" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>teams_nb,</span>
+<span id="cb97-52"><a href="#cb97-52" aria-hidden="true" tabindex="-1"></a>    terms<span class="op">=</span>candidate_vars,</span>
+<span id="cb97-53"><a href="#cb97-53" aria-hidden="true" tabindex="-1"></a>    intercept<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb97-54"><a href="#cb97-54" aria-hidden="true" tabindex="-1"></a>    maxiter<span class="op">=</span><span class="dv">100</span></span>
+<span id="cb97-55"><a href="#cb97-55" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb97-56"><a href="#cb97-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-57"><a href="#cb97-57" aria-hidden="true" tabindex="-1"></a>nb_full, nb_warnings, nb_error <span class="op">=</span> fit_full_negative_binomial_with_report(</span>
-<span id="cb97-58"><a href="#cb97-58" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>teams_nb,</span>
-<span id="cb97-59"><a href="#cb97-59" aria-hidden="true" tabindex="-1"></a>    terms<span class="op">=</span>candidate_vars,</span>
-<span id="cb97-60"><a href="#cb97-60" aria-hidden="true" tabindex="-1"></a>    intercept<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb97-61"><a href="#cb97-61" aria-hidden="true" tabindex="-1"></a>    maxiter<span class="op">=</span><span class="dv">100</span></span>
-<span id="cb97-62"><a href="#cb97-62" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb97-63"><a href="#cb97-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb97-64"><a href="#cb97-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect whether the returned result is reliable</span></span>
-<span id="cb97-65"><a href="#cb97-65" aria-hidden="true" tabindex="-1"></a>result_returned <span class="op">=</span> nb_full <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
-<span id="cb97-66"><a href="#cb97-66" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> result_returned:</span>
-<span id="cb97-67"><a href="#cb97-67" aria-hidden="true" tabindex="-1"></a>    mle_retvals <span class="op">=</span> <span class="bu">getattr</span>(nb_full, <span class="st">&quot;mle_retvals&quot;</span>, {})</span>
-<span id="cb97-68"><a href="#cb97-68" aria-hidden="true" tabindex="-1"></a>    converged <span class="op">=</span> mle_retvals.get(<span class="st">&quot;converged&quot;</span>, <span class="va">False</span>)</span>
-<span id="cb97-69"><a href="#cb97-69" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb97-70"><a href="#cb97-70" aria-hidden="true" tabindex="-1"></a>    mle_retvals <span class="op">=</span> {}</span>
-<span id="cb97-71"><a href="#cb97-71" aria-hidden="true" tabindex="-1"></a>    converged <span class="op">=</span> <span class="va">False</span></span>
-<span id="cb97-72"><a href="#cb97-72" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(converged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb97-57"><a href="#cb97-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect whether the returned result is reliable</span></span>
+<span id="cb97-58"><a href="#cb97-58" aria-hidden="true" tabindex="-1"></a>result_returned <span class="op">=</span> nb_full <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb97-59"><a href="#cb97-59" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> result_returned:</span>
+<span id="cb97-60"><a href="#cb97-60" aria-hidden="true" tabindex="-1"></a>    mle_retvals <span class="op">=</span> <span class="bu">getattr</span>(nb_full, <span class="st">&quot;mle_retvals&quot;</span>, {})</span>
+<span id="cb97-61"><a href="#cb97-61" aria-hidden="true" tabindex="-1"></a>    converged <span class="op">=</span> mle_retvals.get(<span class="st">&quot;converged&quot;</span>, <span class="va">False</span>)</span>
+<span id="cb97-62"><a href="#cb97-62" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb97-63"><a href="#cb97-63" aria-hidden="true" tabindex="-1"></a>    mle_retvals <span class="op">=</span> {}</span>
+<span id="cb97-64"><a href="#cb97-64" aria-hidden="true" tabindex="-1"></a>    converged <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb97-65"><a href="#cb97-65" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(converged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>False</code></pre>
 </div>

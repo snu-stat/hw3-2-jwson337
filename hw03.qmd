@@ -82,11 +82,8 @@ from statsmodels.discrete.discrete_model import NegativeBinomial
 from scipy import stats
 from scipy.special import expit
 from patsy.contrasts import Treatment
-
-import pylahman
 from scipy.optimize import least_squares, brentq, minimize_scalar
 from scipy.stats import t, norm, chi2
-
 import warnings
 ```
 :::
@@ -640,7 +637,6 @@ $$
 ::: {.panel-tabset}
 ## R
 ```{r}
-# python 패키지의 데이터프레임과 동일한 데이터인지 확인 위해. 
 dim(Teams)
 
 # observational unit에 문제 없는지 확인. 
@@ -704,8 +700,7 @@ k_result
 ```
 ## Python
 ```{python}
-Teams_pd = pylahman.Teams()
-Teams = pl.from_pandas(Teams_pd)
+Teams = pl.from_pandas(r.Teams)
 print(Teams.shape)
 
 teams_bj = (
@@ -1427,11 +1422,10 @@ summary(final_glm)
 ```
 ## Python
 ```{python}
-# R과 이름 약간 다른 변수들 존재. 
 candidate_vars = [
     "log_RS", "log_RA",
-    "H", "2B", "3B", "HR", "BB", "SO", "CS", "HBP", "SF",
-    "ERA", "CG", "SHO", "IPOuts", "HA", "HRA", "BBA", "SOA",
+    "H", "X2B", "X3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+    "ERA", "CG", "SHO", "IPouts", "HA", "HRA", "BBA", "SOA",
     "E", "DP", "FP", "SV"
 ]
 
@@ -1757,8 +1751,8 @@ summary(poisson_final)
 ```{python}
 candidate_vars = [
     "log_RS", "log_RA",
-    "H", "2B", "3B", "HR", "BB", "SO", "CS", "HBP", "SF",
-    "ERA", "CG", "SHO", "IPOuts", "HA", "HRA", "BBA", "SOA",
+    "H", "X2B", "X3B", "HR", "BB", "SO", "CS", "HBP", "SF",
+    "ERA", "CG", "SHO", "IPouts", "HA", "HRA", "BBA", "SOA",
     "E", "DP", "FP", "SV"
 ]
 
@@ -2057,13 +2051,6 @@ nb_full$message
 ```{python}
 # statsmodels NegativeBinomial estimates alpha:
 #     Var(W_i) = mu_i + alpha * mu_i^2
-
-candidate_vars = [
-    "log_RS", "log_RA",
-    "H", "2B", "3B", "HR", "BB", "SO", "CS", "HBP", "SF",
-    "ERA", "CG", "SHO", "IPOuts", "HA", "HRA", "BBA", "SOA",
-    "E", "DP", "FP", "SV"
-]
 
 teams_nb = (
     teams_bj
