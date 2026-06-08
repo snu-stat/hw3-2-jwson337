@@ -16,7 +16,7 @@ mainfont: "Noto Sans Korean Light"
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, fig.width=6, fig.height=4, out.width = "70%", fig.align = "center", python.reticulate = TRUE)  
 options(knitr.table.format = "html")
 
-reticulate::use_condaenv("introds", required = TRUE)
+# reticulate::use_condaenv("introds", required = TRUE)
 ```
 
 ## 지시사항
