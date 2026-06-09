@@ -31,7 +31,7 @@ jobs:
 
       - name: Install Python dependencies via Conda
         run: |
-          conda install -n r-reticulate -y pyarrow numpy ipykernel pandas matplotlib polars plotnine statsmodels scipy patsy
+          conda install -n r-reticulate -y pyarrow expat numpy ipykernel pandas matplotlib polars plotnine statsmodels scipy patsy
         shell: bash -l {0}
 
       - name: Set up R

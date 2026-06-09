@@ -23,6 +23,7 @@ ENV PATH=${CONDA_DIR}/bin:${PATH}
 RUN conda create -n r-reticulate --override-channels -c conda-forge -y \
     python=3.10 \
     pyarrow \
+    expat \
     numpy \
     pandas \
     matplotlib \
@@ -40,6 +41,7 @@ RUN conda create -n r-reticulate --override-channels -c conda-forge -y \
 # r-reticulate 환경을 기본 Python/Jupyter 환경으로 사용
 ENV PATH=/opt/conda/envs/r-reticulate/bin:/opt/conda/bin:${PATH}
 ENV RETICULATE_PYTHON=/opt/conda/envs/r-reticulate/bin/python
+ENV LD_LIBRARY_PATH=/opt/conda/envs/r-reticulate/lib:/opt/conda/lib:$LD_LIBRARY_PATH
 ENV MPLBACKEND=Agg
 
 # 5. R 패키지 설치 및 R kernel 등록
