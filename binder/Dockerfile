@@ -1,4 +1,4 @@
-FROM ghcr.io/snu-stat/hw3-2-jwson337:dd0c61fc1e961f8f9d3cffb644ce4b6ab603910e
+FROM ghcr.io/snu-stat/hw3-2-jwson337:eec21c4f212f1030bd9c8cad8993083c2314b102
 
 ARG NB_USER=jovyan
 ARG NB_UID=1000
