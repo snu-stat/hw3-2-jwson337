@@ -5476,9 +5476,9 @@ current_smoker ~ Education + HardDrugs + MaritalStatus + Alcohol12PlusYr +
 <span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
 <span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>display(p1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>display(p1.draw())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;ggplot: (640 x 480)&gt;</code></pre>
+<pre><code>Figure(640x480)</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># iii: Observed WPct vs predicted WPct</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>p2 <span class="op">=</span> (</span>
@@ -5497,9 +5497,9 @@ current_smoker ~ Education + HardDrugs + MaritalStatus + Alcohol12PlusYr +
 <span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> coord_equal()</span>
 <span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> theme_minimal()</span>
 <span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>display(p2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>display(p2.draw())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>&lt;ggplot: (640 x 480)&gt;</code></pre>
+<pre><code>Figure(640x480)</code></pre>
 </div>
 </div>
 </div>
@@ -6258,7 +6258,7 @@ Model Family:                Binomial   Df Model:                            4
 Link Function:                  Logit   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:                -1295.8
 Date:                Tue, 09 Jun 2026   Deviance:                       108.42
-Time:                        18:16:37   Pearson chi2:                     108.
+Time:                        18:44:07   Pearson chi2:                     108.
 No. Iterations:                     4   Pseudo R-squ. (CS):             0.9709
 Covariance Type:            nonrobust                                         
 ==============================================================================
@@ -6742,7 +6742,7 @@ Model Family:                 Poisson   Df Model:                            3
 Link Function:                    Log   Scale:                          1.0000
 Method:                          IRLS   Log-Likelihood:                -1433.6
 Date:                Tue, 09 Jun 2026   Deviance:                       67.326
-Time:                        18:16:40   Pearson chi2:                     67.0
+Time:                        18:44:10   Pearson chi2:                     67.0
 No. Iterations:                     4   Pseudo R-squ. (CS):             0.8302
 Covariance Type:            nonrobust                                         
 ==============================================================================
@@ -6790,7 +6790,8 @@ SV             0.0054      0.001      5.949      0.000       0.004       0.007
 <span id="cb91-19"><a href="#cb91-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb91-20"><a href="#cb91-20" aria-hidden="true" tabindex="-1"></a>nb_warnings <span class="co"># Negative binomial warnings during full-model fitting</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] &quot;iteration limit reached&quot; &quot;iteration limit reached&quot;</code></pre>
+<pre><code>[1] &quot;iteration limit reached&quot; &quot;NaNs produced&quot;          
+[3] &quot;iteration limit reached&quot; &quot;NaNs produced&quot;          </code></pre>
 </div>
 </div>
 </div>
