@@ -76,7 +76,8 @@ import numpy as np
 import pandas as pd
 import polars as pl
 from plotnine import *
-
+import matplotlib
+import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.discrete.discrete_model import NegativeBinomial
