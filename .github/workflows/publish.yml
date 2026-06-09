@@ -56,7 +56,20 @@ jobs:
         run: |
           export CONDA_PREFIX=$(conda info --base)/envs/r-reticulate
           export RETICULATE_PYTHON=$CONDA_PREFIX/bin/python
-          export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:${LD_LIBRARY_PATH}
+          export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$(conda info --base)/lib:${LD_LIBRARY_PATH}
+
+          echo "CONDA_PREFIX=$CONDA_PREFIX"
+          echo "RETICULATE_PYTHON=$RETICULATE_PYTHON"
+          echo "Available libexpat files:"
+          ls -l $CONDA_PREFIX/lib/libexpat* || true
+
+          EXPAT_LIB=$(find "$CONDA_PREFIX/lib" -maxdepth 1 -name "libexpat.so*" | sort | head -n 1)
+          if [ -n "$EXPAT_LIB" ]; then
+            export LD_PRELOAD="$EXPAT_LIB"
+            echo "Using LD_PRELOAD=$LD_PRELOAD"
+          else
+            echo "No Conda libexpat found"
+          fi
 
           quarto render
           quarto render hw03.qmd --to ipynb --output-dir _site
