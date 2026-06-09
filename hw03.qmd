@@ -77,7 +77,6 @@ import pandas as pd
 import polars as pl
 import matplotlib
 matplotlib.use("Agg", force=True)
-import matplotlib.pyplot as plt
 from plotnine import *
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
