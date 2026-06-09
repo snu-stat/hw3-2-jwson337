@@ -1,0 +1,16 @@
+FROM ghcr.io/snu-stat/hw3-2-jwson337:43a5bf7c636dc624dcf69493fce606c62842db8a
+
+ARG NB_USER=jovyan
+ARG NB_UID=1000
+ENV USER=${NB_USER}
+ENV NB_UID=${NB_UID}
+ENV HOME=/home/${NB_USER}
+
+USER root
+COPY . ${HOME}
+RUN chown -R ${NB_UID}:users ${HOME}
+
+USER ${NB_USER}
+WORKDIR ${HOME}
+
+ENTRYPOINT []
