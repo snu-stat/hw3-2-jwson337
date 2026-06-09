@@ -1069,7 +1069,7 @@ p1 = (
     )
     + theme_minimal()
 )
-display(p1)
+display(p1.draw())
 
 
 # iii: Observed WPct vs predicted WPct
@@ -1089,7 +1089,7 @@ p2 = (
     + coord_equal()
     + theme_minimal()
 )
-display(p2)
+display(p2.draw())
 ```
 :::
 
