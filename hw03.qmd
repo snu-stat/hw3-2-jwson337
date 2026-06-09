@@ -16,7 +16,7 @@ mainfont: "Noto Sans Korean Light"
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, warning = FALSE, message = FALSE, fig.width=6, fig.height=4, out.width = "70%", fig.align = "center", python.reticulate = TRUE)  
 options(knitr.table.format = "html")
 
-#  reticulate::use_condaenv("introds", required = TRUE)
+#reticulate::use_condaenv("introds", required = TRUE)
 ```
 
 ## 지시사항
@@ -1069,7 +1069,7 @@ p1 = (
     )
     + theme_minimal()
 )
-display(p1.draw())
+display(p1)
 
 
 # iii: Observed WPct vs predicted WPct
@@ -1089,7 +1089,7 @@ p2 = (
     + coord_equal()
     + theme_minimal()
 )
-display(p2.draw())
+display(p2)
 ```
 :::
 
