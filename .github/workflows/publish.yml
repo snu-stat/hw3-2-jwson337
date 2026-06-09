@@ -1,4 +1,5 @@
 name: Quarto Publish (R & Custom Packages)
+
 on:
   push:
     branches: [ main ]
@@ -11,6 +12,7 @@ jobs:
       packages: write
     env:
       MPLBACKEND: Agg
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -30,13 +32,12 @@ jobs:
       - name: Install Python dependencies via Conda
         run: |
           conda install -n r-reticulate -y pyarrow numpy pandas matplotlib polars plotnine statsmodels scipy patsy
-        # 추가로 필요한 패키지 설치
         shell: bash -l {0}
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
-          use-public-rspm: true 
+          use-public-rspm: true
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
@@ -46,7 +47,6 @@ jobs:
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run: |
           install.packages(c('reticulate', 'remotes', 'IRkernel', 'tidyverse', 'NHANES', 'MASS', 'broom', 'Lahman'))
-        # 추가로 필요한 패키지 설치
         shell: Rscript {0}
 
       - name: Prepare README as Index
@@ -57,17 +57,11 @@ jobs:
           export CONDA_PREFIX=$(conda info --base)/envs/r-reticulate
           export RETICULATE_PYTHON=$CONDA_PREFIX/bin/python
           export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:${LD_LIBRARY_PATH}
+
           quarto render
           quarto render hw03.qmd --to ipynb --output-dir _site
         shell: bash -l {0}
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
-          publish_branch: gh-pages
-      
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -80,4 +74,36 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+
+      - name: Create Binder Dockerfile
+        run: |
+          mkdir -p _site/binder
+          cat > _site/binder/Dockerfile <<EOF
+          FROM ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.sha }}
+
+          ARG NB_USER=jovyan
+          ARG NB_UID=1000
+          ENV USER=\${NB_USER}
+          ENV NB_UID=\${NB_UID}
+          ENV HOME=/home/\${NB_USER}
+
+          USER root
+          COPY . \${HOME}
+          RUN chown -R \${NB_UID}:users \${HOME}
+
+          USER \${NB_USER}
+          WORKDIR \${HOME}
+
+          ENTRYPOINT []
+          EOF
+        shell: bash -l {0}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          publish_branch: gh-pages

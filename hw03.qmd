@@ -68,6 +68,7 @@ library(NHANES)
 library(MASS)
 library(broom)
 library(Lahman)
+set.seed(123)
 ```
 ## Python
 ```{python}
@@ -1058,7 +1059,7 @@ deviance_diagnostic = pd.DataFrame({
 print(deviance_diagnostic)
 
 # ii: Deviance residuals vs linear predictors eta
-(
+p1 = (
     ggplot(teams_bj_pd, aes(x="fitted_link", y="deviance_resid"))
     + geom_point(alpha=0.6)
     + geom_hline(yintercept=0, linetype="dashed")
@@ -1069,10 +1070,11 @@ print(deviance_diagnostic)
     )
     + theme_minimal()
 )
+p1.show()
 
 
 # iii: Observed WPct vs predicted WPct
-(
+p2 = (
     ggplot(teams_bj_pd, aes(x="fitted_WPct", y="WPct"))
     + geom_point(alpha=0.6)
     + geom_abline(
@@ -1088,6 +1090,7 @@ print(deviance_diagnostic)
     + coord_equal()
     + theme_minimal()
 )
+p2.show()
 ```
 :::
 
